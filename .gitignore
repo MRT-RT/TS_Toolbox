@@ -1,0 +1,9 @@
+# git: ignore files
+# backups
+*.*~
+*.bak 
+*.BAK
+html/tsm_Manual*
+.Archiv
+.Backups
+Dokumentation
