@@ -3,7 +3,8 @@
 *.*~
 *.bak 
 *.BAK
-html/tsm_Manual*
 .Archiv
 .Backups
-Dokumentation
+TSModel/html/tsm_Manual*
+Examples/*.pdf
+Examples/*.png

@@ -7,5 +7,5 @@
 cd( '../TSModel' )
 publish( 'tsm_Manual.m','html')
 if strcmp( computer, 'GLNXA64')
-     system('weasyprint html/tsm_Manual.html ../tsm_Manual.pdf')
+     system('weasyprint html/tsm_Manual.html ../TS_Toolbox-Manual.pdf')
 end
