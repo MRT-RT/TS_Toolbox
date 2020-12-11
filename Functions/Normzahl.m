@@ -1,5 +1,6 @@
-%% Normzahl
+%% Normzahl: compute range within R<x>
 
+% %Id$
 
 function n = Normzahl( unten, oben, R )
 

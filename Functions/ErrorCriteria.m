@@ -1,8 +1,9 @@
 %% ErrorCtris: compute error criteria for two vectors
+%
 % Inputs:
 %   y_t true values
-%   y_p predicted  values
-%
+%   y_p predicted/model values
+
 % $Id$
 
 

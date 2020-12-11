@@ -1,5 +1,5 @@
 %% Optimize MF parameters for LiP models
-%
+
 % $Id$
 
 function y = tsm_optimize_LiP_MF( par, u, ts )

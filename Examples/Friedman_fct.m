@@ -1,3 +1,9 @@
+%% Friedman function 2/3/5-dim
+%
+% Friedman, J. H. (1991). Multivariate adaptive regression splines. The annals of statistics, 19(1), 1-67.
+
+% $Id$
+
 function y = Friedman( x, n )
 
 switch n

@@ -1,5 +1,5 @@
 %% Optimize MF&LM parameters for LiP models
-%
+
 % $Id$
 
 

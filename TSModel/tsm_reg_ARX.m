@@ -1,5 +1,7 @@
 %% Function to build the regressor nmatrix for LS models
 
+% $Id$
+
 function x = tsm_reg_ARX( tso, u, y )
 if nargin > 1
     if size(u,2) ~= obj.nu

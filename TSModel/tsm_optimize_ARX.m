@@ -1,5 +1,5 @@
 %% Optimize MF & LM parameters for ARX models
-%
+
 % $Id$
 
 function y = tsm_optimize_ARX( par, z, ts )

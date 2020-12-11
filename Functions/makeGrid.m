@@ -9,7 +9,7 @@
 %%
 % Outputs:
 %  x
-%
+
 % $Id$
 
 function [ Xg, nXg ] = makeGrid( n, nz, limits )

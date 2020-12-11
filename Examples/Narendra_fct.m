@@ -1,5 +1,7 @@
 %% Narendra function
 
+% $Id$
+
 function [u,y] = Narendra_fct( n )
 
 % $Id$

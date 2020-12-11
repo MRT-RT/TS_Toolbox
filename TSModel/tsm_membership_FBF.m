@@ -1,6 +1,5 @@
 %% Compute Fuzzy C-Means membership degree mu( z )
 %
-%
 % $$ \mu_i(z) = \left[ \sum_{j=1}^c \left( \frac{||z-c_i||}{||z-c_j||}\right)^{m} \right]^{-1} $$
 %
 %%
@@ -14,7 +13,7 @@
 % Outputs:
 %%
 %  mu(n,nc) membership degree mu( z,c )
-%
+
 % $Id$
 
 function mu = tsm_membership_FBF( z, c, m )

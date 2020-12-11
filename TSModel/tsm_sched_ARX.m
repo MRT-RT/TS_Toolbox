@@ -1,5 +1,5 @@
 %% Build the scheduling matrix z for ARX models
-%
+
 % $Id$
 
 function z = tsm_sched_ARX( tso, u, y)

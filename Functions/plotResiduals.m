@@ -1,3 +1,19 @@
+%% Function plotResidual
+%%
+% Inputs:
+%   y_true  vector of true values
+%   y_pred  vector of predicted/model values
+%  optional
+%    figure <n>  figure number
+%    title <s>   title of figure
+%    labels <s>
+%    limits []   vector of lower and upper limits for signal
+%%
+% Output:
+%   h   handle of created figure
+
+% $Id$
+
 function h = plotResiduals( y_true, y_pred, varargin )
 
 p = inputParser;

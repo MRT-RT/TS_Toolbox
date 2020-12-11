@@ -1,7 +1,5 @@
 %% Evaluate ARX model for given sched vars z == regressor x = u|y
 
-% $Id$
-
 %%
 % Inputs:
 %   obj:  TS model      (instance of class TSModel)
@@ -10,7 +8,10 @@
 %%
 % Outputs:
 %   yp prdicted output vector (n x 1 )
-%
+
+% $Id$
+
+
 
 function yp = tsm_evaluate_OE( obj, u, y, Theta )
 

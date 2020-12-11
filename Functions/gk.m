@@ -13,6 +13,8 @@
 % F ... cluster covariance matrices
 %----------------- prepare matrices ----------------------------------
 
+% $Id$
+
 function [c,U,F] = gk(z,nc,m,tol)
 
 [N,n] = size(z);   % data size
