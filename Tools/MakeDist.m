@@ -12,12 +12,14 @@
 % Ausgabe:
 %  datei: vollständiger Pfad zum ZIP-Archiv
 
+% Id$
+
 function datei = MakeDist( datei, verzeichnis )
 
 
 %% Zielverzeichnis für Backups
 if nargin < 2
-   verzeichnis = '.';
+   verzeichnis = './Dists';
 end
 
 %% Backup als ZIP-Datei erstellen
@@ -27,7 +29,7 @@ end
 
 %% Dateiname
 if nargin < 1
-    datei = sprintf('TS_Toolbox-%s.zip',...
+    datei = sprintf('TS_Toolbox-%s-dist.zip',...
         datestr(now,'yyyy_mm_dd-HH_MM') );
 end
 if length(datei) < 4 || ~strcmp( datei(end-3:end), '.zip')

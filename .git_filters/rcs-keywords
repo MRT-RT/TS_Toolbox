@@ -1,0 +1,3 @@
+#!/bin/sh
+git config --local filter.rcs-revision.clean ".git_filters/rcs-revision.clean"
+git config --local filter.rcs-revision.smudge ".git_filters/rcs-revision.smudge %f"

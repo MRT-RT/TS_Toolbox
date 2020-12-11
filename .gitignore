@@ -8,3 +8,5 @@
 TSModel/html/tsm_Manual*
 Examples/*.pdf
 Examples/*.png
+Documentation/
+Dists/
