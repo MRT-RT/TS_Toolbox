@@ -3,10 +3,10 @@
 *.*~
 *.bak 
 *.BAK
-.Archiv
-.Backups
+Archiv/
+Backups/
+Dists/
+Documentation/
 TSModel/html/tsm_Manual*
 Examples/*.pdf
 Examples/*.png
-Documentation/
-Dists/

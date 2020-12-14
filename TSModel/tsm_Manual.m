@@ -102,16 +102,12 @@
 
 %% Dokumentation
 %
-%% Verfügbare Objekte 
-%%
-% * Daten
-% Parameter, Methoden
-% * Modell
-% Parameter, Methoden
 
-%% Verfügbare Funktionen
-%
-% Funktionen, die nicht auf Objekten arbeiten
+%% Benötigte Software
+%% 
+% * Matlab R2019a oder höher (Windows/Linux/MacOS)
+% * Matlab Fuzzy Toolbox (Funktion fcm)
+% * Matlab Optimzation Toolbox (Funktion lsqnonlin)
 
 %% Installation
 % 
@@ -119,6 +115,7 @@
 % Verzeichnis entpacken
 % # Das Verzeichnis mit der Klasse |TSModel| muss in den
 % Matlab-Suchpfad aufgenommen werden:
+%%
 %  addpath('.../TS_Toolbox/TSModel')
 
 %% Verzeichnisse
@@ -127,12 +124,6 @@
 % * TS_Toolbox/TSModel: Klasse für TS-Modell
 % * TS_Toolbox/Functions: ohne Klasse TSModel nutzbare Funktionen 
 % * TS_Toolbox/Examples: Beispielprojekte
-
-%% Benötigte Software
-%% 
-% * Matlab R2019a oder höher (Windows/Linux/MacOS)
-% * Matlab Fuzzy Toolbox (Funktion fcm)
-% * Matlab Optimzation Toolbox (Funktion lsqnonlin)
 
 %% Musterprojekte
 %
@@ -156,5 +147,15 @@
 % * Objekt Premisse|tsPrem|: Scheduling / Zugehörigkeitsfunktion (ToDo)
 % * Objekt Premisse|tsConc|: Regressor / lokale Modelle (LiP/ARX/OE) (ToDo)
 
+%% Verfügbare Objekte (ToDo)
+%%
+% * Daten
+% Parameter, Methoden
+% * Modell
+% Parameter, Methoden
+
+%% Verfügbare Funktionen
+%
+% Funktionen, die nicht auf Objekten arbeiten
 %%
 % $Id$

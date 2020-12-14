@@ -14,10 +14,9 @@
 
 function datei = MakeDist( datei, verzeichnis )
 
-
 %% Zielverzeichnis für Backups
 if nargin < 2
-   verzeichnis = '.';
+   verzeichnis = 'TS_Toolbox/Dists';
 end
 
 %% Backup als ZIP-Datei erstellen
@@ -34,16 +33,21 @@ if length(datei) < 4 || ~strcmp( datei(end-3:end), '.zip')
     datei = [ datei, '.zip' ];
 end
 
+
 %% Erstellen ZIP-Archiv
-if not( exist( 'TModel', 'dir' ) )
+if exist( '../TSModel', 'dir' ) % in Tools
     cd( '..' )
 end
+
+cd( '..' )
 pwd
 
 datei = sprintf('%s/%s', verzeichnis,datei );
 zip( datei, ...
-    { 'TSModel/*.m' ; 
-      'Examples/*.m' ; 'Examples/Data/*' ;
-      'Functions/*.m' ; '*.pdf' } )
+    { 'TS_Toolbox/TSModel/*.m' ; 
+      'TS_Toolbox/Examples/*.m' ; 
+      'TS_Toolbox/Examples/Data/*' ;
+      'TS_Toolbox/Functions/*.m' ; 
+      'TS_Toolbox/*.pdf' } )
 %
 dir( [ verzeichnis, '/*.zip' ] )

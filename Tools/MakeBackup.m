@@ -18,13 +18,9 @@ function datei = Backup( datei, verzeichnis )
 
 %% Zielverzeichnis für Backups
 if nargin < 2
-   verzeichnis = './.Backups';
+   verzeichnis = 'Backups';
 end
 
-%% Backup als ZIP-Datei erstellen
-if ~exist( verzeichnis, 'dir' )
-    mkdir( verzeichnis )
-end
 
 %% Dateiname
 if nargin < 1
@@ -36,16 +32,22 @@ if length(datei) < 4 || ~strcmp( datei(end-3:end), '.zip')
 end
 
 %% Erstellen ZIP-Archiv
-if not( exist( 'TModel', 'dir' ) )
+if not( exist( 'TSModel', 'dir' ) )
     cd( '..' )
-    
 end
 pwd
+
+%% Backup als ZIP-Datei erstellen
+if ~exist( verzeichnis, 'dir' )
+    mkdir( verzeichnis )
+end
 
 datei = sprintf('%s/%s', verzeichnis,datei );
 zip( datei, ...
     { 'TSModel/*.m' ; 
-      'Examples/*.m' ; 'Examples/Data/*' ;
-      'Functions/*.m' ; 'Tools/*.m' } )
+      'Examples/*.m' ; 
+      'Examples/Data/*' ;
+      'Functions/*.m' ; 
+      'Tools/*.m' } )
 %
 dir( [ verzeichnis, '/*.zip' ] )
