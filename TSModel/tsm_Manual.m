@@ -114,83 +114,47 @@
 % Funktionen, die nicht auf Objekten arbeiten
 
 %% Installation
-%
-% ToDo
-%
-% Verzeichnisse
+% 
+% # Das Archiv |TS_Modell-<datum>-dist.zip| in ein beliebiges
+% Verzeichnis entpacken
+% # Das Verzeichnis mit der Klasse |TSModel| muss in den
+% Matlab-Suchpfad aufgenommen werden:
+%  addpath('.../TS_Toolbox/TSModel')
+
+%% Verzeichnisse
 %% 
-% * TS_Toolbox
-% * TS_Toolbox/Functions
-% * TS_Toolbox/Examples
+% * TS_Toolbox: Hauptverzeichnis der Toobox
+% * TS_Toolbox/TSModel: Klasse für TS-Modell
+% * TS_Toolbox/Functions: ohne Klasse TSModel nutzbare Funktionen 
+% * TS_Toolbox/Examples: Beispielprojekte
+
+%% Benötigte Software
+%% 
+% * Matlab R2019a oder höher (Windows/Linux/MacOS)
+% * Matlab Fuzzy Toolbox (Funktion fcm)
+% * Matlab Optimzation Toolbox (Funktion lsqnonlin)
 
 %% Musterprojekte
 %
-% im Verzeichnis |Examples|
+% im Verzeichnis |Examples| befinden sich einige Projekte, die den
+% typischen Workflow bei der Arbeit mit der Toolbox zeigen:
 %%
-% * statisch: Akademisches Beispiel    |Test_LS_Akad|
-% * statisch: Friedmann-Funktion 2D/3D |Test_LS_Friedman|
-% * statisch: Kompressor-Kennlinie 3D  |Test_LS_Kompressor|
-% * dynamisch: Narendra (SISO)         |Test_ARX_Narendra.m|
-% * dynamisch: Regelkappe (SISO)       |Test_ARX_Throttle.m|
-% * dynamisch: Drosselkappe IAV (MISO) |Test_ARX_Ladedruck.m|
+% * statisch: Akademisches Beispiel    |LiP_Akad|
+% * statisch: Friedmann-Funktion 2D/3D |LiP_Friedman|
+% * statisch: Kompressor-Kennlinie 3D  |LiP_Kompressor|
+% * dynamisch: Narendra (SISO)         |NARX_Narendra.m|
+% * dynamisch: Narendra (SISO)         |NOE_Narendra.m|
+% * dynamisch: Regelkappe (SISO)       |NARX_Throttle.m|
+% * dynamisch: Drosselkappe IAV (MISO) |NARX_Ladedruck.m|
 
 %% Implementierung
 %
 % Objektorientierte Realisierung: 
 %%
-% * Objekt |Daten|: $u(t),y(t)$
-% * Objekt |Modell|: Daten, Premisse, Konklusion
-% * Objekt |Premisse|: Scheduling / Zugehörigkeitsfunktion
-% * Objekt |Konklusion|: Regresser / lokale Modelle (ARX/OE)
-
-%% Benötigte Software
-%% 
-% * Matlab R2019a oder höher (Windows//Linux/MacOS)
-% * Matlab Fuzzy Toolbox (FCM)
-% * Matlab Optimzation Toolbox (lsqnonlin)
-
-%% Geplante Erweiterungen
-%
-% <html>
-% <table>
-% <th>Aufgabe<th>Zeitraum<th>Prio<th>Status<tr>
-% <!--->
-% <td>Toolbox als OO-Klasse in Matlab<br>
-% Identifikation+Optimierung TS-Modelle<br>
-% statisch + ARX/OE (mg)
-% <td>1<td> 5/20<td>Erledigt 100%<tr>
-% <!--->
-% <td>ARX MISO-Modelle<br>
-% Optimierung MISO<br>
-% Tests Matlab-Optimierungsverfahren/-parameter
-% <td>2<td>5/20 – 6/20<td>Erledigt: 100%<tr>
-% <!--->
-% <td>Subklassen für Modelle <br>
-% (LS/ARX/OE) und Datensätze
-% <td><td>6/20<td>60%<tr>
-% <!--->
-% <td>Testsignalentwurf (mg)
-% <td><td>6/20 - 7/20<td>0%<tr>
-% <!--->
-% <td>Regelung (as)
-% <td><td>7/20<td>0%<tr>
-% <!--->
-% <td>Strukturselektion (mk)
-% <td><td><td>10%<tr>
-% <!--->
-% <td>Maximum-Likelihood (jf)
-% <td><td><td>0%<tr>
-% <!--->
-% <td>BETS (fw)
-% <td><td><td>0%<tr>
-% <!--->
-% <td>Datascreening (da)
-% <td><td><td>0%<tr>
-% <!--->
-% <td>Implementierung weitere Cluster-Verfahren
-% <td><td><td>0%<tr>
-% </table>
-% </html>
+% * Objekt Daten |tsData|: $u(t),y(t)$
+% * Objekt Modell |tsModel|: Daten, Premisse, Konklusion
+% * Objekt Premisse|tsPrem|: Scheduling / Zugehörigkeitsfunktion (ToDo)
+% * Objekt Premisse|tsConc|: Regressor / lokale Modelle (LiP/ARX/OE) (ToDo)
 
 %%
 % $Id$

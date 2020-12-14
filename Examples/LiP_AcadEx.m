@@ -16,11 +16,11 @@ addpath( '../TSModel' ) % Path to TSModel files
 %% Model order
 nc = 3;    % number of clusters = local models
 nu = 2;    % number of inputs
-nue = 1.2; % fuziness parameter
+nue = 1.2; % fuzziness parameter
 
 % Input vector u and output vector y
 load( 'Data/AcadEx.mat' )
-dt = 1; % Implicit sampling time for static models
+dt = -1; % Implicit sampling time for static models
 
 %% Data of the true model (not really needed)
 %
@@ -34,43 +34,49 @@ a0 = [ -4,  4, -2
         4, -2, -4
         2,  1,  1 ];
 
-%% Create true model as TSModel ts0
-ts0 = TSModel( 'LiP', nc, nu, 'Name','Academic','Comment','True academic example');
+%% Create true model as TSModel: ts0
+ts0 = TSModel( 'LiP', nc, nu, 'Name','Academic', 'Comment','true academic example');
 ts0.setCluster( c0 );
 ts0.setFuziness( nue );
 ts0.set_msf_type( 'FBF' );
+
 %%
-% Set the parameters a of local models
+% Set the parameters a of local models (A,B,C)
 ts0.setLM( [], a0(:,1:nu), a0(:,end) );
 
 %% Create TS model
 ts1 = TSModel( 'LiP', nc, nu, 'Name','AcadEx','Comment','Academic example')
+
 %%
 % Set training u,y data and limits of u,y
 ts1.setData( u, y, 'SampleTime',dt, 'Labels', { 'u_1','u_2', 'y' }, 'Comment', 'from function' );
-ts1.setDataLimits( [0,2 ;0,2; -7,7] );
+ts1.setDataLimits( [0,2 ;0,2; -7,7] ); % [u1,u2], [y]
+
 %% 
 % Set the inital clusters c0
 ts1.setCluster( c0 );
-ts1.plotCluster( c0,'figure', 1, 'file','Test-c0', 'title', 'AcedEx: initial clusters' )
+ts1.plotCluster( c0,'figure', 1, 'file','AcadEx-c0', 'title', 'AcadEx: initial clusters c_0' )
 
 %% Clustering in product-space (u,y) with KMeans algorithm
-% 10 iterations, random generator seed 0
+% with 10 tries and random generator seed 0
 ts1.clustering( 'KMeans', 'nue', nu, 'tries',10, 'seed', 0 )
-c1 = getCluster( ts1 );
+c11 = getCluster( ts1 );
 
 %% Initialize TS as FBF and LiP with global LS 
 ts1.initialize( 'FBF', 'nue', nue, 'method', 'G'  );
+% Show the settings of the TS object
+disp( ts1 )
 
 %% Compute TS model for given data
 yp1 = ts1.evaluate( u );
+% and show the residuals
 plotResiduals( y, yp1, 'figure', 2, 'title', 'AcadEx: residuals' );
 
-%% Optimize Clusters c (MF) and/or local model A/B/C (Both)
+%% Optimize Clusters c (MF) and/or local models A/B/C or (Both)
 ts1.optimize( 'B' )
 c12 = getCluster( ts1 );
 yp1 = ts1.evaluate( u );
-plotResiduals( y, yp1, 'figure', 3, 'title', 'AcedEx: residuals of opt. model' );
+plotResiduals( y, yp1, 'figure', 3, 'title', 'AcadEx: residuals of opt. model' );
 
 %% Create copy of the TS model
 ts2 = copy( ts1 );
@@ -83,26 +89,31 @@ yp2 = ts2.evaluate( u );
 %% Optimize only memberships
 ts2.optimize( 'M' );
 e2 = ErrorCriteria(y,yp2);
+% Get the local model parameters (y=B2*u+C2)
+[~,B2,C2] = getLM( ts2 )
 
 %% Create another copy of the TS model
 ts3 = copy( ts2 );
+
 %%
 % Optimize only local models
 ts3.optimize( 'L' );
-yp3= ts3.evaluate( u );
-e3 = ErrorCriteria( y,yp3 );
+yp3 = ts3.evaluate( u );
+e3 = ErrorCriteria( y, yp3 );
 
 %% Evaluate TS model on regular grid 50x50
 ngrid = 50;
 [u1g,u2g] = meshgrid( linspace(0,2,ngrid),linspace(0,2,ngrid) );
 ugrid = [ reshape( u1g,ngrid*ngrid,1), reshape(u2g,ngrid*ngrid,1) ];
 
+% true values
 ygrid = ts0.evaluate( ugrid );
+% predicted values
 ypgrid= ts1.evaluate( ugrid );
 
 plotResiduals( ygrid, ypgrid, 'figure', 4, 'title', 'Residuals AcadEx grid data' );
 
-%% Plot 2x2 true vs, predicted model
+%% Plot 2x2 true vs. predicted model
 figure(5),clf
 
 subplot(2,2,1)

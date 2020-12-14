@@ -12,14 +12,14 @@
 
 %% Given: MISO system
 %
-% * input vector $u(n x n_u)$  (MI)
+% * input vector $u(n x n_u)$ (MI)
 % * output vector $y(n x 1)$ (SO)
 % * number of clusters $n_c$
-% * clusterinMFg algoithm (FCM/GK)
+% * clustering algoithm (FCM/GK)
 % * membership function type (FBF/Gauss) with fuziness parameter $\nue$
 % * type of local models (LiP/ARX/OE)
-% * lags for scheduling variables $z_{{lag}_u}$ and $z_{{lag}_y}$ (default = $[1\ldots n_u]$ and $[1\ldots n_u]$
-% * lags for regressor variables $x_{{lag}_u}$ and $x _{{lag}_y}$ (default = $[1\ldots n_u]$
+% * lags for scheduling variables $z_{lag}_u}$ and $z_{lag}_y}$ (default = $[1\ldots n_u]$ and $[1\ldots n_y]$
+% * lags for regressor variables $x_{lag}_u}$ and $x _{lag}_y}$ (default = $[1\ldots n_u]$
 
 %% Mathematics
 %
@@ -31,18 +31,19 @@
 %
 % and the local models
 %
-%
 % $$\hat{y}_{li}(k) = \cdot A_i\cdot y(x) + B_i\cdot U(x) + C_i$$
 %
 % with the regressor
 %
-%%$$x = \left[ x_{{lag}_u}), x_{{lag}_u} \right]$
+% $$x = \left[ x_{lag}_u}), x_{lag}_u} \right]$$
 
 %% Type: LiP-Model
 %
 % $A=[]$, $z = u(1\ldots n_u)$
 
 %% Type: ARX-Model
+%
+% $z = u(1\ldots n_u)$
 
 %% Type: OE-Model
 %
@@ -59,7 +60,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
             'Version', '1.3', ...
             'Date', '12.11.2020', ...
             'Author', 'Axel Dürrbaum', ...
-            'Organisation', 'University of Kassel / ISAC', ...
+            'Organisation', 'University of Kassel / ISAC / MRT', ...
             'eMail', 'axeld@uni-kassel.de' )
         
         %% Model order
@@ -158,7 +159,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                 error( 'TSModel: need at least Matlab R2019b' )
             end
             
-            addpath( '../Functions', './Functions' )
+            addpath( '../Functions' )
            
             p = inputParser;
             valFcn = @(x) isscalar(x) && x>0;
@@ -487,14 +488,15 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                     obj.z = [ obj.z, ones(obj.n_ident,1) ];
                     
                     obj.l_Type = opts.method;
+                    %Todo: random/manual
                     
                     if strcmp( opts.method, 'local' ) % local LS
                         obj.Theta = [];
                         for ic = 1 : obj.nc
                             Phi = bsxfun( @times, obj.z, obj.zmu(:,ic)  );
-                            Theta = Phi \ obj.y_ident;
-                            obj.Theta = [obj.Theta, Theta ];
-                            phi =  transpose( reshape(  Theta, obj.nu+1,1 ) );
+                            theta = Phi \ obj.y_ident;
+                            obj.Theta = [obj.Theta, theta ];
+                            phi =  transpose( reshape(  theta, obj.nu+1,1 ) );
                             obj.B( ic, : ) = phi( 1:obj.nu );
                             obj.C( ic, 1 ) = phi( obj.nu+1 );
                         end

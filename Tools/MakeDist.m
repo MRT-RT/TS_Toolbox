@@ -12,14 +12,12 @@
 % Ausgabe:
 %  datei: vollständiger Pfad zum ZIP-Archiv
 
-% Id$
-
 function datei = MakeDist( datei, verzeichnis )
 
 
 %% Zielverzeichnis für Backups
 if nargin < 2
-   verzeichnis = './Dists';
+   verzeichnis = '.';
 end
 
 %% Backup als ZIP-Datei erstellen
