@@ -2,9 +2,6 @@
 %
 % $Id$ 11.5.2020/ad
 
-% ToDo: Limits u=min/max or Limits lsnonlin
-% 29.3.20/[obj.A,obj.B] als Phi?
-
 %%
 % Compute and optimize a nonlinear Takagi--Sugeno--Model
 % by clustering and identification opf local models
