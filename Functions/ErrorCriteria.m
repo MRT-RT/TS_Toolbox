@@ -1,25 +1,33 @@
-%% ErrorCtris: compute error criteria for two vectors
+%% ErrorCrtieria: compute error criteria for difference of two vectors
 %
 % Inputs:
 %   y_t true values
 %   y_p predicted/model values
+% Optional:
+%   np  number of parameters AIC/BIC
+% Outputs:
+%   ec  struct with error criteria
+
+% Hint: ny = 1 due to MISO models in TS toolbox
+% ts not given -> AIC/BIC = -1
 
 % $Id$
 
-
-function ec = ErrorCriteria( y_true, y_pred )
+function ec = ErrorCriteria( y_true, y_pred, np )
 
 %% Check dimensions
-[nrow,ncol] = size( y_true );
-if min( [nrow,ncol] ) ~= 1
+if ~isvector( y_true )
     error( 'ErrorCrits: y_true not n x1 vector')
 end
 
+[nrow,ncol] = size( y_true );
+
 if ~isequal( size(y_true), [nrow,ncol] )
-    error( 'SimErrors: dim mismatch y_true <> y_pred')
+    error( 'ErrorCrits: dim mismatch y_true <> y_pred')
 end
 
 dy = y_true - y_pred;
+N = length( dy );
 
 % Maximum absolute error (MAE)
 ec.MAE = max( abs(dy) );
@@ -28,7 +36,7 @@ ec.MAE = max( abs(dy) );
 ec.SSE = transpose( dy ) * dy;
 
 % Mean squared error (MSE)
-ec.MSE = ec.SSE / length(y_true);
+ec.MSE = ec.SSE / N;
 
 % Root mean squared error (RMSE)
 ec.RMSE = sqrt(ec.MSE);
@@ -38,6 +46,13 @@ ym = mean( y_true );
 dym = y_true - ym;
 ec.NMSE = ec.MSE / ( transpose(dym) * dym);
 
-% Best fit rate (BFR)
+% Best fit rate
 ec.BFR = 1 - sqrt(ec.NMSE);
 
+%% TS model for numer of parameters
+if np > 0
+    [ec.AIC,~,~,ec.BIC ] = aic( dym, N, np, 1 );
+else
+    ec.AIC = -1;
+    ec.BIC = -1;
+end

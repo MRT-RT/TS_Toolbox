@@ -10,6 +10,7 @@ addpath( '..' )  % Path to TSModel files
 nc = 3;    % number of clusters = local models
 nu = 1;    % number of inputs
 ny = 1;    % number of outputs
+
 nue = 1.1; % fuzziness parameter
  
 % Input vector u and output vector y

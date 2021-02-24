@@ -1,8 +1,19 @@
-%% TS-Toolbox: NOE example (throttle valve)
+%% Takagi-Sugeno Model Identification Toolbox
+%
+% NOE LiP model example for the Narendra function
+%
+%
+% Axel Dürrbaum (<axel.duerrbaum@mrt.uni-kassel.de>)
+%
+% Department of Measurement and Control (MRT)
+%
+% Institute for System Analytics and Control (ISAC) 
+%
+% University of Kassel, Germany 
+% (<http://www.uni-kassel.de/go/mrt>) 
 
-% $Id$
+% $Id$%
 
-clear, close all
 
 addpath( '..' ) % Path to TSModel files
 
@@ -32,7 +43,7 @@ ylabel('y')
 xlabel('t')
 
 %% Create TS model
-ts = TSModel( 'OE', nc, nu, 'Name','Narendra', 'Comment','Function #2')
+ts = TSModel( 'OE', nc, nu, 'Name','OE Narendra', 'Comment','Narendra function');
 ts.setLags( [0], [2] );
 
 ts.setData( u, y, 'SampleTime',dt, 'Labels', { 'u', 'y' } );
@@ -40,28 +51,28 @@ ts.setDataLimits( [-2,2 ; -5,10] );
 
 %% Clustering in product-space (u,y)
 ts.clustering( 'FCM', 'nue', nue, 'tries',1, 'seed', 0 )
-c1 = getCluster(ts);
+v1 = getCluster(ts);
 
 %% Initialize local LS models with LS (global/local)
-ts.initialize( 'FBF', 'nue', nue, 'method','global'  );
+ts.initialize( 'FCM', 'nue', nue, 'method','global'  );
 %ts.initialize( 'FBF', 'nue', nue, 'method','local'  );
 
 %% Compute TS model for given data
-yp = ts.evaluate( u,y );
-plotResiduals( y, yp, 'figure', 2, 'title', 'Narendra NARX: residuals' );
+yp = ts.predict( u,y );
+plotResiduals( y, yp, 'figure', 2, 'title', 'Narendra NARX: correlation' );
 
 %%
 figure(3),clf
 plot(t,u,'k-',t,y,'g-',t,yp,'r-')
 grid on
-title('Narendra NOE: ident data')
-legend('u','y','y_{pred}')
+title('Narendra NOE: observed data')
+legend('u','y_{obsv}','y_{pred}')
 
 %% Eval on unkown data
 [ut,yt] = Narendra_fct( n );
 
-ypt = ts.evaluate( ut,yt );
-plotResiduals( y, ypt, 'figure', 4, 'title', 'Narendra NOE: residuals test data' );
+ypt = ts.predict( ut,yt );
+plotResiduals( y, ypt, 'figure', 4, 'title', 'Narendra NOE: corrleation on test data' );
 
 figure(5),clf
 
@@ -80,14 +91,14 @@ legend('u','y','y_{pred}')
 
 %% Optimize Clusters c (MF) and/or local model A/B/C
 ts.optimize( 'B' )
-c2 = getCluster( ts );
+v2 = getCluster( ts );
 
-ypo = ts.evaluate( u,y );
-plotResiduals( y, ypo, 'figure', 6, 'title', 'Narendra NOE: residuals opt' );
+ypo = ts.predict( u,y );
+plotResiduals( y, ypo, 'figure', 6, 'title', 'Narendra NOE: correlation opt' );
 
 figure(7),clf
 plot(t,ut,'k-',t,yt,'g-',t,ypt,'r-')
 grid on
-title('Narendra NOE: opt eval data')
+title('Narendra NOE: opt predicted ouput')
 legend('u','y','y_{pred}')
 

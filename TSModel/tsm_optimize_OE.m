@@ -5,14 +5,14 @@
 
 function y = tsm_optimize_OE( par, ts )
 
-% par0 = [ c | Theta ]
+% par0 = [ v | Theta ]
 
     t = ts.nA + ts.nB; 
-    n = ts.nc * t;
-    c = reshape( par(1:n), ts.nc, t );
+    n = ts.nv * t;
+    v = reshape( par(1:n), ts.nv, t );
     theta = transpose( par(n+1:end) );
 
-    y = tsm_evaluate_OE( ts, ts.u_ident, ts.y_ident, theta ) - ts.y_ident;
+    y = tsm_predict_OE( ts, ts.u_ident, ts.y_ident, theta ) - ts.y_ident;
 
 end
 

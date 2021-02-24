@@ -1,51 +1,57 @@
-%% Compute Fuzzy C-Means membership degree mu( z )
+%% tsm_membership_FCM
+% Compute Fuzzy C-Means membership degree mu( z )
 %
-% $$ \mu_i(z) = \left[ \sum_{j=1}^c \left( \frac{||z-c_i||}{||z-c_j||}\right)^{m} \right]^{-1} $$
+% $$ \mu_i(z) = \left[ \sum_{j=1}^n_v \left( \frac{||z-v_i||}{||z-v_j||}\right)^{m} \right]^{-1} $$
+%
+% Set mu = 1, if ||z_j-v_i|| < realmin
+% Set mu = 0, if sum ||z_j-v_i|| < realmin
 %
 %%
 % Inputs:
 %%
-%  z       scheduling vector (n x nv)
-%  c       vector of clusters (nc xnv)
-%  m       fuzziness parameter 2 / (nue-1)
+%  z        scheduling vector (N x nd)
+%  v        vector of clusters (nv x nd)
+%  m        fuzziness parameter m = 2 / (nue-1)
 %
-%%
 % Outputs:
 %%
-%  mu(n,nc) membership degree mu( z,c )
-
+%  mu(N,nd)  membership degree mu( z,v )
+%
 % $Id$
 
-function mu = tsm_membership_FBF( z, c, m )
+function mu = tsm_membership_FCM( z, v, m )
 
-%%
-n = size(z,1);
-[nc,nv] = size(c);
+N = size( z, 1 );
+[ nv, nd ] = size( v );
 
-%? Check nv  == size(z,2) == size(c,2)
+% Check nv  == size(z,2) == size(v,2)
+if size( z, 2 ) ~= nd 
+    error( 'tsm_membership_FBF: dim mismatch z / v' )
+end
 
-%% dzc = || z - c(i,:) ||
-dzc = zeros(n,nc);
-for i=1:n
-    for ic = 1:nc
-        dzc(i,ic) = sqrt( sum( (z(i,:) - c(ic,:)).^2, 2 ) ).^m;
+% Distance of all data z to cluster centers c: dzc = || z - v(i,:) ||
+dzv = zeros(N,nv);
+for i=1:N
+    for iv = 1:nv
+        dzv(i,iv) = sqrt( sum( (z(i,1:nd) - v(iv,:)).^2, 2 ) ).^m;
     end
 end
 
-%% sdzc = sum( 1/dzc^m )
-sdzc = sum( 1./dzc, 2 );
-% Test for reactivation --> sum == 0
-tsdzc = sdzc < realmin;
-if any( tsdzc )
-    warning( 'membership degree: reactivation?' )
+% Inverse sum of distances sdzv = sum( 1/dzv^m )
+sdzv = sum( 1./dzv, 2 );
+
+% Search for reactivation --> sum ~ 0
+tsdzv = sdzv < realmin;
+if any( tsdzv )
+    warning( 'tsm_membership_FBF: possible reactivation' )
 end
 
-%% mu( z )
-mu = zeros(n,nc);
-for ic=1:nc
-    mu(:,ic) = 1 ./ ( dzc(:,ic) .* sdzc );
+% membership degree mu( z )
+mu = zeros( N, nv );
+for iv=1:nv
+    mu(:,iv) = 1 ./ ( dzv(:,iv) .* sdzv );
     % z = c(i)
-    mu( dzc(:,ic) < realmin ,ic ) = 1;
+    mu( dzv(:,iv) < realmin ,iv ) = 1;
     % reactivation
-    mu( tsdzc, ic ) = 1/nc;
+    mu( tsdzv, iv ) = 1/nv;
 end

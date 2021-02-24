@@ -1,12 +1,12 @@
-%% Optimize MF parameters for LiP models
+%% Optimize MF parameters for Static models
 
 % $Id$
 
-function y = tsm_optimize_LiP_MF( par, u, ts )
+function y = tsm_optimize_Static_MF( par, u, ts )
 
-    c = reshape( par(1:ts.nc*ts.nu), ts.nc, ts.nu );
+    v = reshape( par(1:ts.nv*ts.nu), ts.nv, ts.nu );
 
-    mu = tsm_membership_FBF( u,c,ts.m );
+    mu = tsm_membership_FBF( u,v,ts.m );
     ypl = transpose( ts.B * transpose(u) + ts.C );
     y = sum( mu .* ypl, 2 );
 

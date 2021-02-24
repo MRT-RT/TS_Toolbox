@@ -3,6 +3,7 @@
 *.*~
 *.bak 
 *.BAK
+*.asv
 Archiv/
 Backups/
 Dists/
@@ -10,3 +11,4 @@ Documentation/
 TSModel/html/tsm_Manual*
 Examples/*.pdf
 Examples/*.png
+Examples/html

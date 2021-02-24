@@ -4,14 +4,14 @@
 
 function z = tsm_sched_ARX( tso, u, y)
 if nargin > 1
-    if size(u,2) ~= obj.nu
+    if size(u,2) ~= tso.nu
         error('tsm_Sched_ARX: cols u <> n_u')
     end
 else
     u = tso.u_ident;
 end
 if nargin > 2
-    if size(y,2) ~= obj.ny
+    if size(y,2) ~= tso.ny
         error('tsm_Sched_ARX: cols y <> n_y')
     end
 else
