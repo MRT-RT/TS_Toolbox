@@ -1,3 +1,7 @@
+%% plotMSF_activation
+%
+% $Id$
+
 function plotMSF_activation( tsm, u )
 
 [n,nu] = size(u);

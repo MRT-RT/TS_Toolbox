@@ -1,4 +1,6 @@
 %% mkLHSData
+% $Id$
+
 function lhsdata = mkLHSData(n,rows,cols,Plots)
 
 if nargin < 1
