@@ -11,17 +11,19 @@
 %
 % University of Kassel, Germany 
 % (<http://www.uni-kassel.de/go/mrt>) 
+%
+% $Id$
 
 %% Identification data 
 % Use the 2D-Friedman function:
 % $$ y = 10\cdot\sin( \pi\cdot u_1 \cdot u_2 ) $$
 nu = 2;
 %%
-% Input matrix $u$ as random data with $N$ data-points: $u_{1,2}\in[0,1]$
+% Choose input matrix $u$ as random data with $N$ data-points: $u_{1,2}\in[0,1]$
 N = 500;
 u = rand( N, nu );
 %%
-% Calculate output vector $y$
+% Compute output vector $y$ from the Friedman function:
 y = Friedman_fct( u, nu );
 
 %% Structural parameters
@@ -29,7 +31,7 @@ y = Friedman_fct( u, nu );
 Par.nu = size( u, 2);    
 %%
 % Number of clusters $n_v$ = number of local models ($n_v$ > 1)
-Par.nv = 3 : 5;    
+Par.nv = 0;    
 %%
 % Fuzziness parameter (FBF: $\nu = [1.05,\ldots, 2]$, Gauss: $\sigma^2$)
 Par.fuzzy = 1.2; 
