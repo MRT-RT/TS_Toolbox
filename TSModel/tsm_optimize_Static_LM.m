@@ -2,7 +2,6 @@
 
 % $Id$
 
-
 function y = tsm_optimize_Static_LM( par, u, ts )
 
     n1 = 1;
@@ -12,7 +11,7 @@ function y = tsm_optimize_Static_LM( par, u, ts )
     n2 = n1 + ts.nv-1;
     C = reshape( par( n1 : n2 ), ts.nv, 1 );
 
-    mu = tsm_membership_FBF( u, ts.v, ts.m );
+    mu = ts.z_msf( u, ts.v, ts.m ); 
     ypl = transpose( ts.B * transpose(u) + ts.C );
     y = sum( mu .* ypl, 2 );
 

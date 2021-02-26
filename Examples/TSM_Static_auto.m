@@ -1,17 +1,19 @@
 % TSM_Static_auto
+%
+% $Id$
 
 function [ts, yp, par ] = TSM_Static_auto( u,y, par, varargin )
 
 addpath( '../TSModel' )
 
-%% Default limits
-% minimal number of clustes / local models
-nv_min = 3; 
-% minimal data-points per parameter
-N_min = 5;  
-
 % Number of data-points
 N = size( y, 1 );
+
+%% Default limits
+% minimal number of clusters / local models
+nv_min = 2; 
+% minimal number of data-points per parameter
+N_min = 10;  
 
 %% Default parameters
 if nargin < 3 % only u and y -> default par
@@ -40,29 +42,29 @@ if ~isfield( par, 'nv' ) || ( isscalar(par.nv) && par.nv == 0 )
 
     % Minimum x equations per parameter -> nv <= N/x  nPar
     nPar = floor( N / N_min );
-    
     if par.ProductSpace
         % nPar = nv*( nu + 1 ) + nv * ( nu + 1 ) = nv * 2 * (nu+1)
-        nv_max = max( nv_min, floor( nPar / (2*(par.nu+1)) ) );
+        nd = 2*(par.nu+1);
     else
         % nPar = nv* nu  + nv * ( nu + 1 ) = nv * 2 * nu
-        nv_max = max( nv_min, floor( nPar / (2*par.nu) ) );
+        nd = 2*par.nu;
     end
-    if par.Debug > 0, fprintf('max nv choosen as %d\n', nv_max ),end
-    
+    nv_max = max( nv_min, floor( nPar / nd ) );
+    if par.Debug > 0, fprintf('nv_max choosen as %d for %d parameters and %d data-points/paramter\n',...
+            nv_max, nd, N_min ),end
     par.nv = nv_min : nv_max;
 end
 
 % Test mu -> loop mu = [ 1.05, 1.1, 1.2, 1.5 , 2 ]
 if ~isfield( par, 'fuzzy' ) || ( isscalar(par.fuzzy) && par.fuzzy == 0 )
-    if strcmp( par.MSFt, 'FCM' )
+    if strcmp( par.MSF, 'FCM' )
         % FCM
         par.fuzzy = [ 1.05, 1.1, 1.2, 1.5, 2 ];
-        if par.Debug > 0, fprintf('choosen range for MSF FCM $\nu$\n' ),end
+        if par.Debug > 0, fprintf('auto-range for MSF FCM nue\n' ),end
     elseif strcmp( par.MSFt, 'Gauss' )     
         % Gauss_ sigma
         par.fuzzy = 0;
-        if par.Debug > 1, fprintf('choosen range for MSF Gauss $\sigma\n' ),end
+        if par.Debug > 1, fprintf('choosen range for MSF Gauss \sigma\n' ),end
     else
         error( 'Unknown MSF type' )
     end
@@ -127,20 +129,21 @@ for nv = par.nv
     for fuzzy = par.fuzzy
        
         if par.Debug > 0
-            fprintf( 'Iteration: nv=%2d / fuzzy=%4g\n',nv,fuzzy   )
+            fprintf( 'Iteration: nv=%2d / fuzzy=%4.2f\n',nv,fuzzy   )
         end
         tic
         
         %% Inital TS model
-        ts = TSModel( 'Static', nv, par.nu, 'comment', 'created by TSM_static' );
+        ts = TSModel( 'Static', nv, par.nu, 'comment', 'created by TSM_static_auto' );
         ts.setData( u, y, 'Labels', labels );
         
         nfig = 1;
-        for t = 1 : par.Tries
+        for s = 1 : par.Tries
             
-            ts.clustering( par.Clustering, 'nue', fuzzy, 'productspace', par.ProductSpace, 'tries', par.Tries );
+            ts.clustering( par.Clustering, 'nue', fuzzy, ...
+                'productspace', par.ProductSpace, 'tries', par.Tries );
             
-            ts.initialize( par.MSF, 'method', par.LS );
+            ts.initialize( par.MSF, 'nue', fuzzy, 'method', par.LS );
             
             yp = ts.predict( u, y );
             
@@ -166,47 +169,46 @@ for nv = par.nv
             dy = y - yp;
             sse = transpose( dy ) * dy;
             mse = sse / length(y);
+            
+            if mse < best.mse
+                best.try = s;
+                best.mse = mse;
+                best.nv = nv;
+                best.fuzzy = fuzzy;
+                best.ts = copy( ts );
+                best.yp = yp;
+            end
+            
             if par.Debug > 1
-                fprintf( ' try %2d:   mse = %7.4e / best =  %7.4e (nv=%2d/fuzzy=%4g)\n', ...
-                    t,mse,best.mse,best.nv,best.fuzzy )
+                fprintf( ' try %2d: mse = %7.4e / delta = %+7.4e (nv=%2d/fuzzy=%4g)\n', ...
+                    s,mse,mse-best.mse,best.nv,best.fuzzy )
+                %fprintf( '---> %7g %7g %g\n', mse,best.mse, mse-best.mse )
             end
             
             if strcmp( par.Plots, 'iter' )
                 % number of model parameters
                 np = numel( ts.v ) + numel( ts.A ) + numel( ts.B ) + numel( ts. C );
-                ts.plotCluster( ts.v, 'figure', nfig+1,'title', sprintf('Static auto: cluster centers v try %2d',t) );
-                plotResiduals( y, yp, 'parameter', np, 'figure', nfig+2, 'title',  sprintf('Static auto: corrleation try %2d',t) );
+                ts.plotCluster( ts.v, 'figure', nfig+1,'title', sprintf('Static auto: cluster centers v try %2d',s) );
+                plotResiduals( y, yp, 'parameter', np, 'figure', nfig+2, 'title',  sprintf('Static auto: corrleation try %2d',s) );
                 nfig = nfig+2;
             end
             
-            if mse < best.mse
-                best.try = t;
-                best.mse = mse;
-                best.fuzzy = fuzzy;
-                best.nv = nv;
-                best.ts = copy( ts );
-                best.yp = yp;
-            end
-            
-        end
+        end % tries
         
-        % Result -> best TS model
-        ts = best.ts;
-        
+       
         %% Optimize best TS model
         if strcmp( par.IterOpt, 'best' )
             switch par.ParOpt
-                
                 case 'none'
                 case 'cluster'
-                    ts.optimize( 'C', 'optimopts', optimOpt );
+                    best.ts=best.ts.optimize( 'C', 'optimopts', optimOpt );
                 case 'models'
-                    ts.optimize( 'M', 'optimopts', optimOpt );
+                    best.ts=best.ts.optimize( 'M', 'optimopts', optimOpt );
                 case 'both'
-                    ts.optimize( 'B', 'optimopts', optimOpt );
+                    best.ts=best.ts.optimize( 'B', 'optimopts', optimOpt );
             end
             
-            yp = ts.predict( u, y );
+            yp = best.ts.predict( u, y );
             
             dy = y - yp;
             sse = transpose( dy ) * dy;
@@ -214,15 +216,23 @@ for nv = par.nv
             best.mse = mse;
             best.yp = yp;
             
-            if par.Debug > 1
-                fprintf( 'Optimize: mse = %7.4e\n', mse )
-            end
+            if par.Debug > 1, fprintf( 'Optimize: mse = %7.4e\n', mse ), end
             
         end % opt
-        if par.Debug > 1, fprintf(' time = %g s\n', toc ), end
+        
+        if par.Debug > 0, fprintf(' time = %g s\n', toc ), end
          
     end % fuzzy
 end % nv
+
+%% Best TS model 
+ts = best.ts;
+yp = best.yp;
+
+if par.Debug > 0
+    fprintf( '\nBest model: nv=%2d / fuzzy=%4.2f /  mse = %7.4e\n', ...
+         best.nv,best.fuzzy,best.mse )
+end
 
 if strcmp( par.Plots, 'final' )
     % number of model parameters

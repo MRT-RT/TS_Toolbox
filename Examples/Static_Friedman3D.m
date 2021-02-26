@@ -11,101 +11,101 @@
 %
 % University of Kassel, Germany 
 % (<http://www.uni-kassel.de/go/mrt>) 
+%
+% $Id$
 
 %% Identification data 
-% Use the Friedman 3D-function: $n_u=3$
-% $$ y = 10\cdot\sin( \pi\cdot u_1 \cdot u_2 + 20\cdot(u_3-0.5)^2 $$
+% Use the 3-dimansional Friedman function: 
 nu = 3;
 %%
-% Input matrix $u$ as random data with $N$ data-points: $u_{1,2}\in[0,1]$
+% $$ y = 10\cdot\sin( \pi\cdot u_1 \cdot u_2 + 20\cdot(u_3-0.5)^2 $$
+%%
+% Choose the input matrix $u$ as random data with $N$ data-points: $u_{1,2}\in[0,1]$
 N = 500;
 u = rand( N, nu );
 %%
-% Calculate output vector $y$
+% Compute the output vector $y$:
 y = Friedman_fct( u, nu );
 
 %% Structural parameters
-% Number of inputs $n_u$ = number of columns in $u$
-Par.nu = size( u, 2);    
-%%
-% Number of clusters $n_v$ = number of local models ($n_v$ > 1)
-Par.nv = 3 : 5;    
-%%
-% Fuzziness parameter (FBF: $\nu = [1.05,\ldots, 2]$, Gauss: $\sigma^2$)
-Par.fuzzy = 1.2; 
-
-%% Optional settings
-% 
-% For more control over the approximation process.
+% Number of clusters $n_v$ = number of local models
+nv = 5;    
 %% 
-% Multi-Start: number of tries $m$ (clustering & LS), default = 10
-Par.Tries = 3;
+% Fuzziness parameter: $\nu = 1.2$
+fuzzy = 1.2; 
 %%
-% Clustering: Fuzzy C-Means (FCM) / Gustafson-Kessel (GK) / KMeans (KMeans), default = 'FCM'
-Par.Clustering = 'FCM';
-%%
-% Clustering in product space:  $u$ and $y$ (true) or only input space $u$ (false)
-Par.ProductSpace = true;
-%%
-% Norm for clustering: 'Euclidian' or 'Mahalanobis', default = 'Euclidian'
-Par.Norm = 'Euclidan';
-%%
-% Membership functions: 'FCM' clustering or 'Gauss' type
-Par.MSF = 'FCM';
-%%
-% Least Squares estimation of local models: 'local' or 'global', default = 'global'
-Par.LS = 'global';
-%%
-% Optimize model parameters: default='both'
-%%
-% * no optimization: 'none',
-% * only $v$: 'cluster',
-% * only local models ($B_i,c_i$): 'model', or
-% * both $v$ and $B_i,c_i$: 'both'
-Par.Optimize = 'both';
-%%
-% Optimize each try or only best try: default='each'
-%%
-% * each try: 'each',
-% * best try: 'best' (less computation time)
-Par.IterOpt = 'each';
-%%
-% Plot clusters and residuals: 'none'/'iter'/'final', default='final'
-Par.Plots = 'final';
+% Membership function Type: FCM
+MSF = 'FCM';
 
-% Debug infos (0=none, 1=info, 2=detailed)
-Par.Debug = 2;
+%% Estimation of the static LiP TS model
+ts = TSModel( 'Static', nv, nu, 'comment', 'Friedman 3D' );
+%%
+% Set the identification data: $u$, $y$
+ts.setData( u, y );
 
-%% Estimation of  LiP TS model parameters
 %%
-% Estimate the TS model with plot of clustering and correlation:
-model = TSM_Static_auto( u, y, Par );
+% Clustering:
 %%
-% Predict the model output $y_{pred}$ for input $u$:
-y_pred = model.predict( u, y );
+% * FCM: fuzziness parameter $\nu=1.2$ with Euclidian norm (default)
+% * clustering in product-space
+% * Multi-Start: 5 tries
+ts.clustering( MSF, 'nue', fuzzy, 'productspace', true, 'tries', 5 );
+            
 %%
-% Plot a residual histogram:
-hr = plotResidualHist( y, y_pred, 'figure', 3 );
+% Initialisation of local models: global least squares estimation
+ts.initialize( MSF, 'nue', nu, 'method', 'global' );
+
+%%
+% Optimization of both: membership and local model parameters
+ts.optimize( 'B' );
+
+%%
+% Show the resultiung TS model parameters:
+disp( ts )
+
+%%
+% Plot the cluster centers: $v$
+v = getCluster( ts )
+ts.plotCluster( v, 'figure',1)
+
+%%
+% Predict the TS model output: $y_{pred}$
+y_pred = ts.predict( u, y );
+
+%%
+% Plot the correlation
+hr = plotResiduals( y, y_pred, 'figure', 2, 'title', 'Friedman-3D: correleation' );
+hr.WindowState = 'maximized';
+%%
+% Plot the residual histogram:
+hh = plotResidualHist( y, y_pred, 'figure', 3, 'nbins', 21, ...
+    'title', 'Friedman-3D: residual histogram' );
+hh.WindowState = 'maximized';
+
 %%
 % Plot the rule activation and input/output data:
-ha = plotRuleActivation( u,y,model, 'figure', 4 );
+ha = plotRuleActivation( u,y_pred, ts, 'figure', 4 );
+ha.WindowState = 'maximized';
+
+%% Validation of the TS model
+%
+% Choose  another $N$ random inputs $[u_1,u_2,u_3]$
+u_val = rand( N, nu );
+y_obsv = Friedman_fct( u_val, nu );
 %%
-% Show the resuktiung TS model parameters:
-disp( model )
-
-%% Test with unknown data
-u_test = rand( N, nu );
-y_obsv = Friedman_fct( u_test, nu );%%
-% Calculate output vector $y_{pred}$
-y_pred = model.predict( u_test );
-
-figure(3),clf
-plot( 1:N, y_obsv, 'k-',1:N, y_pred, 'r--' )
+% Compute the output vector: $y_{pred}$
+y_val_pred = ts.predict( u_val );
+%%
+% Plot the outputs
+h=figure(5);clf
+plot( 1:N, y_obsv, 'k-',1:N, y_val_pred, 'r--' )
 grid on
 xlabel('k')
 ylabel('y')
-title( 'Friedman-3D: observed vs. predicted ouput' )
+title( 'Friedman-3D: Validation/observed vs. predicted ouput' )
 legend( 'y_{obsv}','y_{pred}' )
+h.WindowState = 'maximized';
 
 %%
-h = plotResiduals( y_obsv, y_pred, 'figure', 4, 'title', 'Friedman-3D: correlation' );
+hr = plotResiduals( y_obsv, y_val_pred, 'figure', 6, 'title', 'Friedman-3D: validation/correlation' );
+hr.WindowState = 'maximized';

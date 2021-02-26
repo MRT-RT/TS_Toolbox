@@ -88,7 +88,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
         
         z_fct = []     % pointer to sched var function z = fct(u,y)
         z_msf = []     % pointer to membership function msf(u)
-        z_Type         % type of membership function msf(u) Fuzzy/Gauss
+        z_Type ='FCM'  % type of membership function msf(u) FCM/Gauss
         
         zmu            % membership degrees of z
         
@@ -738,7 +738,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                     obj.OptimPR.optimopts = optimopts;
                     obj.OptimPR.exitflag = exitflag;
                     obj.OptimPR.resnorm = resnorm;
-                    obj.OptimPR.resitual = residual;
+                    obj.OptimPR.residual = residual;
                     obj.OptimPR.output = output;
                     
                 case 'ARX'
@@ -883,7 +883,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
             if ~isempty( obj.Comment ) % for c in obj.Comment
                 fprintf( ' (%s)', obj.Comment )
             end
-            fprintf( '\n Structual parameters: nu = %d, ny = %d, nv = %d', obj.nu, obj.ny, obj.nv )
+            fprintf( '\n Structural parameters: nu = %d, ny = %d, nv = %d', obj.nu, obj.ny, obj.nv )
             
             if obj.n_ident > 0
                 fprintf( '\n Identification data: N=%d', obj.n_ident )
@@ -903,11 +903,13 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                 end
             end
             
-            fprintf( '  Membership function type = %s\n', obj.z_Type )
             if ~isempty( obj.z_lag_y )
                 fprintf( 'y = %s\n', mat2str(obj.z_lag_y) )
             end
             
+            if ~isempty( obj.z_lag_y )
+                fprintf( '  Membership function type = %s\n', obj.z_Type )
+            end
             switch obj.c_Type 
                 case'FCM'
                     fprintf( '  Clustering: %s, nue=%g norm=%s\n', obj.c_Type, obj.nue, obj.c_Norm )
@@ -963,7 +965,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                     if ~isempty( obj.z )
                         plot( obj.z(:,i1),obj.z(:,i2),'k.', 'MarkerSize',8 )
                         hold on
-                        l{end+1} = 'data';
+                        l{end+1} = 'data points';
                     end
                     plot( v(:,i1), v(:,i2), 'rx', 'MarkerSize', 12 )
                     if ~isempty( obj.Limits )
@@ -976,6 +978,9 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                     if ~isempty( obj.Labels )
                         xlabel( obj.Labels(i1), 'FontSize', 14  )
                         ylabel( obj.Labels(i2), 'FontSize', 14  )
+                    else
+                        xlabel( sprintf('u_{%d}',i1), 'FontSize', 14  )
+                        ylabel( sprintf('u_{%d}',i2), 'FontSize', 14  )
                     end
                     if is == 1 && ~isempty( opts.title )
                         title( opts.title, 'FontSize', 14 )
@@ -1025,7 +1030,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                 grid on
                 ylabel( sprintf('u_{%d}',i ) )
                 if is ==1
-                    title( sprintf( 'Identification data n=%d', obj.n_ident ) )
+                    title( sprintf( 'Identification data N=%d data-points', obj.n_ident ) )
                 end
             end
             for i=1:ny

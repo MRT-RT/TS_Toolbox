@@ -8,7 +8,8 @@ Archiv/
 Backups/
 Dists/
 Documentation/
-TSModel/html/tsm_Manual*
+TSModel/html/TSModel_*.png
+TSModel/html/tsm_Manual_*.png
 Examples/*.pdf
 Examples/*.png
 Examples/html

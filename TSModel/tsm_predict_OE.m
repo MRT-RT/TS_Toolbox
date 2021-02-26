@@ -1,16 +1,15 @@
-%% Evaluate ARX model for given sched vars z == regressor x = u|y
-
+%% tsm_predict_oe
+% Predict OE model for given sched vars z == regressor x = u|y
 %%
-% Inputs:
-%   obj:  TS model      (instance of class TSModel)
-%   u:    input vector  (n x 1 )
-%   y:    output vector  (n x 1 )
-%%
-% Outputs:
-%   yp prdicted output vector (n x 1 )
+%  Inputs:
+%   tso   TS model      (instance of class TSModel)
+%   u     input vector  (n x nu )
+%   y     initial output vector  (maxlag x 1 )
+%   Theta parameter od local modells
+%  Outputs:
+%   yp     predicted output vector (n x 1 )
 
 % $Id$
-
 
 function yp = tsm_predict_OE( tso, u, y, Theta )
 

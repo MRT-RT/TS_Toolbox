@@ -1,6 +1,6 @@
 %% Takagi-Sugeno Model Identification Toolbox
 %
-% Static LiP model for the 2-dimensional-Friedman function.
+% Automatic static LiP model for the 2-dimensional-Friedman function.
 %
 %
 % Axel Dürrbaum (<axel.duerrbaum@mrt.uni-kassel.de>)
@@ -15,25 +15,25 @@
 % $Id$
 
 %% Identification data 
-% Use the 2D-Friedman function:
+% Use the 2-dimensional Friedman function:
 % $$ y = 10\cdot\sin( \pi\cdot u_1 \cdot u_2 ) $$
 nu = 2;
 %%
-% Choose input matrix $u$ as random data with $N$ data-points: $u_{1,2}\in[0,1]$
+% Choose the input matrix $u$ as random data with $N$ data-points: $u_{1,2}\in[0,1]$
 N = 500;
 u = rand( N, nu );
 %%
-% Compute output vector $y$ from the Friedman function:
+% Compute the output vector $y$ from the Friedman function:
 y = Friedman_fct( u, nu );
 
 %% Structural parameters
 % Number of inputs $n_u$ = number of columns in $u$
 Par.nu = size( u, 2);    
 %%
-% Number of clusters $n_v$ = number of local models ($n_v$ > 1)
-Par.nv = 0;    
+% Number of clusters $n_v$ = number of local models ($n_v$ > 1): 0 = select range nv=2...nv_max  
+Par.nv = 0;  
 %%
-% Fuzziness parameter (FBF: $\nu = [1.05,\ldots, 2]$, Gauss: $\sigma^2$)
+% Fuzziness parameter (FCM: $\nu = [1.05,\ldots, 2]$, Gauss: $\sigma^2$)
 Par.fuzzy = 1.2; 
 
 %% Optional settings
@@ -76,7 +76,7 @@ Par.IterOpt = 'each';
 Par.Plots = 'final';
 
 % Debug infos (0=none, 1=info, 2=detailed)
-Par.Debug = 2;
+Par.Debug = 1;
 
 %% Estimation of  LiP TS model parameters
 %%
@@ -88,26 +88,41 @@ y_pred = model.predict( u, y );
 %%
 % Plot a residual histogram:
 hr = plotResidualHist( y, y_pred, 'figure', 3 );
+hr.WindowState = 'maximized';
+
 %%
 % Plot the rule activation and input/output data:
 ha = plotRuleActivation( u,y,model, 'figure', 4 );
+ha.WindowState = 'maximized';
+
 %%
 % Show the parameter of the resulting TS model:
 disp( model )
 
-%% Test with unknown data
-u_test = rand( N, nu );
-y_obsv = Friedman_fct( u_test, nu );%%
-% Calculate output vector $y_{pred}$
-y_pred = model.predict( u_test );
+%% Validate with unknown data
+% Choose another $N$ random data-points: $[u_1,u_2]$
+u_val = rand( N, nu );
+y_val_obsv = Friedman_fct( u_val, nu );%%
+%%
+% Compute output vector $y_{val,pred}$
+y_val_pred = model.predict( u_val );
 
-figure(3),clf
-plot( 1:N, y_obsv, 'k-',1:N, y_pred, 'r--' )
+%% 
+% Plot the TS model with the validation data
+h=figure(3);clf
+plot( 1:N, y_val_obsv, 'k-',1:N, y_val_pred, 'r--' )
 grid on
 xlabel('k')
 ylabel('y')
-title( 'Friedman-2D: observed vs. predicted ouput' )
+title( 'Friedman-2D: validation/observed vs. predicted ouput' )
 legend( 'y_{obsv}','y_{pred}' )
+h.WindowState = 'maximized';
 
 %%
-h = plotResiduals( y_obsv, y_pred, 'figure', 4, 'title', 'Friedman-2D: correlation' );
+% Plot the correlation for the validation data
+hr = plotResiduals( y_val_obsv, y_val_pred, 'figure', 4, 'title', 'Validation/correlation' );
+hr.WindowState = 'maximized';
+%%
+% Plot a residual histogram for the validation data:
+hv = plotResidualHist( y_val_obsv, y_val_pred, 'figure', 5, 'title', 'Validation/residual histogram' );
+hv.WindowState = 'maximized';

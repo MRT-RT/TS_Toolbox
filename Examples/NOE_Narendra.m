@@ -1,6 +1,6 @@
 %% Takagi-Sugeno Model Identification Toolbox
 %
-% NOE LiP model example for the Narendra function
+% Example of a NOE LiP TS model for the Narendra function
 %
 %
 % Axel Dürrbaum (<axel.duerrbaum@mrt.uni-kassel.de>)
@@ -11,27 +11,42 @@
 %
 % University of Kassel, Germany 
 % (<http://www.uni-kassel.de/go/mrt>) 
-
+%
 % $Id$%
 
-
-addpath( '..' ) % Path to TSModel files
+%%
+% Path to TSModel files
+addpath( '..' ) 
 
 %% Model order
 nc = 3;    % number of clusters = local models
 nu = 1;    % number of inputs
 ny = 1;    % number of outputs
 nue = 1.2; % fuzziness parameter
+%%
+% Scheduling lags $z$ = regressor lags $x=[y(k-1),y(k-2),u(k)]$ 
+z_lag_u = {0};
+z_lag_y = [2];
+x_lag_u = {0};
+x_lag_y = [2];
 
-%% Generate Narendra model data
-n = 1000;
+%% Compute identification data
+%
+% Create input $u$ as steps with width $l=1,\ldots,20]$ for $N=1000$ time steps 
+% and compute the output $y$ from the Narendra function 
+N = 1000;
 rng(0);
-[u,y] = Narendra_fct( n );
-
-dt = 1e-2; % Sampling time
+[u,y] = Narendra_fct( N );
+%%
+% Sampling time
+dt = 1e-2; 
+%%
+% Creat tiume vector $t$
 t = dt * transpose( 0:size(u,1)-1 );
 
-figure(1),clf
+%% Plot of the identification data
+h=figure(1);clf
+
 subplot(2,1,1)
 plot(t,u)
 grid
@@ -42,39 +57,55 @@ grid
 ylabel('y')
 xlabel('t')
 
-%% Create TS model
+%% Creation of  TS model
 ts = TSModel( 'OE', nc, nu, 'Name','OE Narendra', 'Comment','Narendra function');
-ts.setLags( [0], [2] );
-
+ts.setSchedulingLags( z_lag_u, z_lag_y );
+ts.setRegressorLags( x_lag_u, x_lag_y );
+%%
+% Set the identification data
 ts.setData( u, y, 'SampleTime',dt, 'Labels', { 'u', 'y' } );
 ts.setDataLimits( [-2,2 ; -5,10] );
 
-%% Clustering in product-space (u,y)
-ts.clustering( 'FCM', 'nue', nue, 'tries',1, 'seed', 0 )
-v1 = getCluster(ts);
+%% Clustering 
+% Clustering in product-space $z=[u,y]$ with FCM membership functions and
+% $\nu=1.2$ with 3 multi-start tries and ficed initialized random number
+% generator
+ts.clustering( 'FCM', 'nue', nue, 'tries',3, 'seed', 0 )
+%%
+% Get the cluster centers of the inital model
+v1 = getCluster(ts)
 
-%% Initialize local LS models with LS (global/local)
+%% Initialization of local models 
+% with global Least-Squares, FCM membership funtions and $\nu=1.2$
 ts.initialize( 'FCM', 'nue', nue, 'method','global'  );
-%ts.initialize( 'FBF', 'nue', nue, 'method','local'  );
 
-%% Compute TS model for given data
+%% Predicted NOE TS model ouput
 yp = ts.predict( u,y );
-plotResiduals( y, yp, 'figure', 2, 'title', 'Narendra NARX: correlation' );
+hr=plotResiduals( y, yp, 'figure', 2, 'title', 'Narendra NOE: correlation' );
+hr.WindowState = 'maximized';
 
 %%
-figure(3),clf
+% Plot of the observed vs. predicted outputs
+h=figure(3);clf
+
 plot(t,u,'k-',t,y,'g-',t,yp,'r-')
 grid on
-title('Narendra NOE: observed data')
+xlabel( 'time t' )
+ylabel( 'output y' )
+title('Narendra NOE: observed vs. predicted outputs')
 legend('u','y_{obsv}','y_{pred}')
+h.WindowState = 'maximized';
 
-%% Eval on unkown data
-[ut,yt] = Narendra_fct( n );
-
+%% Prediction on validation data
+[ut,yt] = Narendra_fct( N );
 ypt = ts.predict( ut,yt );
-plotResiduals( y, ypt, 'figure', 4, 'title', 'Narendra NOE: corrleation on test data' );
-
-figure(5),clf
+%%
+% Plot the correlation
+hr=plotResiduals( y, ypt, 'figure', 4, 'title', 'Narendra NOE: corrleation on test data' );
+h.WindowState = 'maximized';
+%%
+% Plot of observed vs. predicted validation data
+h=figure(5);clf
 
 yyaxis left
 plot(t,ut,'b--')
@@ -86,19 +117,33 @@ ylabel( 'y' )
 xlabel( 't' )
 
 grid on
-title('Narendra NOE: eval data')
+title('Narendra NOE: validation data')
 legend('u','y','y_{pred}')
+h.WindowState = 'maximized';
 
-%% Optimize Clusters c (MF) and/or local model A/B/C
+%% Optimization of the TS model parameters
+% Optimize the cluster centers $v$ (MF) and the local model parameters $A_i, B_i, c_i$
 ts.optimize( 'B' )
-v2 = getCluster( ts );
-
+%%
+% Get the cluster centers of the optimized NOE TS model
+v2 = getCluster( ts )
+%%
+% Plot the correlation on validation data
 ypo = ts.predict( u,y );
-plotResiduals( y, ypo, 'figure', 6, 'title', 'Narendra NOE: correlation opt' );
-
-figure(7),clf
-plot(t,ut,'k-',t,yt,'g-',t,ypt,'r-')
+hr=plotResiduals( y, ypo, 'figure', 6, 'title', 'Narendra NOE: correlation opt' );
+hr.WindowState = 'maximized';
+%%
+% Plot the observed vs. the predicted validation data
+h=figure(7);clf
+yyaxis left
+plot(t,ut)
+ylabel( 'input u' )
+yyaxis right
+plot(t,yt,'g-',t,ypt,'r-')
 grid on
-title('Narendra NOE: opt predicted ouput')
-legend('u','y','y_{pred}')
+ylabel( 'output y' )
+xlabel( 'time t' )
+title('Narendra NOE optimized: predicted validation output')
+legend('u','y_{obsv}','y_{pred}')
+h.WindowState = 'maximized';
 
