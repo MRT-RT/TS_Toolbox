@@ -36,13 +36,13 @@ $rev =~ /^Date:\s*(.*)\s*$/m;
 $date = $1;
 $rev =~ /^commit (.*)$/m;
 $ident = $1;
-$ver=`git describe --tags --long`
+$vers=`git describe --tags --long`;
 
 while (<STDIN>) {
-    s/\$Date[^\$]*\$/\$Date:   $date \$/;
+    s/\$Date[^\$]*\$/\$Date: $date \$/;
     s/\$Author[^\$]*\$/\$Author: $author \$/;
-    s/\$Id[^\$]*\$/\$Id: $filename | $ver | $date | $name \$/;
-    s/\$File[^\$]*\$/\$File:   $filename \$/;
+    s/\$Id[^\$]*\$/\$Id: $filename | $vers | $date | $name \$/;
+    s/\$File[^\$]*\$/\$File: $filename \$/;
     s/\$Source[^\$]*\$/\$Source: $path \$/;
     s/\$Revision[^\$]*\$/\$Revision: $ident \$/;
 } continue {
