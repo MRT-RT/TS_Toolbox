@@ -1,7 +1,8 @@
 %% Takagi-Sugeno Model Identification Toolbox
 %
-% Automatic static LiP model for the 2-dimensional-Friedman function.
+% Automatic static LiP model for the 2-dimensional Friedman function.
 %
+% V1.0
 %
 % Axel Dürrbaum (<axel.duerrbaum@mrt.uni-kassel.de>)
 %
@@ -14,12 +15,14 @@
 %
 % $Id$
 
-%% Identification data 
+%% Minimal required data 
 % Use the 2-dimensional Friedman function:
 % $$ y = 10\cdot\sin( \pi\cdot u_1 \cdot u_2 ) $$
 nu = 2;
+% Choose the fuzziness parameter $\nu = 1.2$
+nue = 1.2;
 %%
-% Choose the input matrix $u$ as random data with $N$ data-points: $u_{1,2}\in[0,1]$
+% Choose the input matrix $u$ as random data with $N$ data-points: $u_1,u2\in[0,1]$
 N = 500;
 u = rand( N, nu );
 %%
@@ -30,17 +33,19 @@ y = Friedman_fct( u, nu );
 % Number of inputs $n_u$ = number of columns in $u$
 Par.nu = size( u, 2);    
 %%
-% Number of clusters $n_v$ = number of local models ($n_v$ > 1): 0 = select range nv=2...nv_max  
+% Number of clusters $n_v$ = number of local models ($n_v$ > 1): 
+%%
+% 0 = select range $n_v=2,\ldots,n_{v,\max}$  with $n_{v,\max} = N / ( 10 * (2*n_u+1)$
 Par.nv = 0;  
 %%
-% Fuzziness parameter (FCM: $\nu = [1.05,\ldots, 2]$, Gauss: $\sigma^2$)
-Par.fuzzy = 1.2; 
+% Fuzziness parameter (FCM: $\nu = \{1.05,\ldots, 2\}$, Gauss: $\sigma^2$)
+Par.fuzzy = nue; 
 
 %% Optional settings
 % 
 % For more control over the approximation process.
 %% 
-% Multi-Start: number of tries $m$ (clustering & LS), default = 10
+% Multi-Start: number of tries $s$ (clustering & LS), default = 10
 Par.Tries = 3;
 %%
 % Clustering: Fuzzy C-Means (FCM) / Gustafson-Kessel (GK) / KMeans (KMeans), default = 'FCM'
@@ -84,45 +89,65 @@ Par.Debug = 1;
 model = TSM_Static_auto( u, y, Par );
 %%
 % Predict the model output $y_{pred}$ for input $u$:
-y_pred = model.predict( u, y );
+y_pred = model.predict( u );
 %%
 % Plot a residual histogram:
-hr = plotResidualHist( y, y_pred, 'figure', 3 );
-hr.WindowState = 'maximized';
+plotResidualHist( y, y_pred, 'figure', 3 );
+set(gcf,'WindowState','maximized');
 
 %%
 % Plot the rule activation and input/output data:
-ha = plotRuleActivation( u,y,model, 'figure', 4 );
-ha.WindowState = 'maximized';
+plotRuleActivation( u,y,model, 'figure', 4 );
+set(gcf,'WindowState','maximized');
 
 %%
 % Show the parameter of the resulting TS model:
 disp( model )
 
-%% Validate with unknown data
+%% Validatation of TS model
 % Choose another $N$ random data-points: $[u_1,u_2]$
 u_val = rand( N, nu );
-y_val_obsv = Friedman_fct( u_val, nu );%%
+y_val_obsv = Friedman_fct( u_val, nu );
 %%
 % Compute output vector $y_{val,pred}$
 y_val_pred = model.predict( u_val );
 
 %% 
 % Plot the TS model with the validation data
-h=figure(3);clf
+figure(3),clf
+subplot(3,1,1:2)
 plot( 1:N, y_val_obsv, 'k-',1:N, y_val_pred, 'r--' )
 grid on
-xlabel('k')
 ylabel('y')
-title( 'Friedman-2D: validation/observed vs. predicted ouput' )
+title( 'Friedman-2D: validation' )
 legend( 'y_{obsv}','y_{pred}' )
-h.WindowState = 'maximized';
+subplot(3,1,3)
+plot( 1:N, y_val_obsv- y_val_pred, 'k-' )
+grid on
+ylabel( 'y_{obs}-y_{pred}')
+xlabel('k')
+set(gcf,'WindowState','maximized');
 
 %%
 % Plot the correlation for the validation data
-hr = plotResiduals( y_val_obsv, y_val_pred, 'figure', 4, 'title', 'Validation/correlation' );
-hr.WindowState = 'maximized';
+plotResiduals( y_val_obsv, y_val_pred, 'figure', 4, ...
+    'title', 'validation/correlation' );
+set(gcf,'WindowState','maximized');
 %%
 % Plot a residual histogram for the validation data:
-hv = plotResidualHist( y_val_obsv, y_val_pred, 'figure', 5, 'title', 'Validation/residual histogram' );
-hv.WindowState = 'maximized';
+plotResidualHist( y_val_obsv, y_val_pred, 'figure', 5, ...
+    'title', 'validation/correlation histogram' );
+set(gcf,'WindowState','maximized');
+
+%%
+% Plot predicted vs. observed $y$ in 3D
+figure(6),clf
+plot3(u_val(:,1),u_val(:,2),y_val_obsv,'k.',...
+      u_val(:,1),u_val(:,2),y_val_pred,'r.')
+view(50,25)
+  grid on
+xlabel('u_1')
+ylabel('u_2')
+zlabel('y')
+title( 'validation' )
+set(gcf,'WindowState','maximized');

@@ -1,32 +1,33 @@
-%% tsm_predict_oe
-% Predict OE model for given sched vars z == regressor x = u|y
+%% tsm_predict_OE
+% Predict OE model for given sched var z and regressor var x = u|y
 %%
 %  Inputs:
 %   tso   TS model      (instance of class TSModel)
 %   u     input vector  (n x nu )
-%   y     initial output vector  (maxlag x 1 )
+%   y0     initial output vector  (maxlag x 1 )
 %   Theta parameter od local modells
 %  Outputs:
 %   yp     predicted output vector (n x 1 )
 
 % $Id$
 
-function yp = tsm_predict_OE( tso, u, y, Theta )
+function y_pred = tsm_predict_OE( tso, u, y0, Theta )
 
 if nargin < 4
     Theta = tso.Theta;
 end
 
-n = size(y,1);
-yp = zeros( n, 1);
-yp(1:tso.x_maxlag) = y(1:tso.x_maxlag);
+N = size(u,1);
+y_pred = zeros( N, 1);
+
+y_pred(1:tso.x_maxlag) = y0(1:tso.x_maxlag);
 
 ny = length(tso.x_lag_y);
 x = zeros( 1, tso.nx );
-for i=tso.x_maxlag+1:n
+for i=tso.x_maxlag+1:N
 
     for k=1:ny
-        x(k) = yp( i+1-tso.x_lag_y(k) );
+        x(k) = y_pred( i+1-tso.x_lag_y(k) );
     end
     
     for iu=1:tso.nu
@@ -43,7 +44,6 @@ for i=tso.x_maxlag+1:n
         xe = [xe repmat(mu(:,k), t) .* [x,1]];
     end
     
-    yp(i) = xe*Theta;
+    y_pred(i) = xe*Theta;
     
 end
-

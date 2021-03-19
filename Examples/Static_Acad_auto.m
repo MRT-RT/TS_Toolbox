@@ -2,6 +2,7 @@
 %
 % Automatic static LiP model for an academic example
 %
+% V1.0
 %
 % Axel Dürrbaum (<axel.duerrbaum@mrt.uni-kassel.de>)
 %
@@ -17,18 +18,18 @@
 %%
 % 
 % Example of automatic identification of a static MISO LiP TS model for 
-% given inputs $u$ and output $y$ with minimal requirements.
+% given multiple inputs $u$ and single output $y$ with minimal requirements.
 
 %% 
 % Determine the MISO LiP TS model
 %
-% $$y(u) = \sum_{i=1}^{n_v} \phi_i(z) \cdot \left(\sum_{j=1}^{n_u} B_{i,j}\cdot u_j\right) + c_{i}$$
+% $$y(u) = \sum_{i=1}^{n_v} \phi_i(z) \cdot \left(\sum_{j=1}^{n_u} B_{i,j}\cdot u_j + c_{i}\right) $$
 %%
-% * for given $u_j, j=1,\ldots,n_u$ of $n_u$ input vectors and 
+% * for given vectors $u_j, j=1,\ldots,n_u$ of $n_u$ inputs and 
 % * vector $y$ of single output,
 % * with FCM membership function
 % $$ \mu_i(x) = \left( \sum_{j=1}^{n_v} \left( \frac{||z-v_i||}{ ||z-v_j||} \right)^{\dfrac{2}{\nu-1}} \right)^{-1} $$
-% * or Gauss membership function
+% * or Gaussian membership function
 % $$ \mu_i(z) = e^{-\dfrac{||z-v_i||^2}{2\cdot\sigma_i^2}} $$
 % * norm $||z-v_j|| = (z-v_j)^T\cdot A_j\cdot (z-v_j)$
 % * and fuzzy basis functions
@@ -39,9 +40,9 @@
 
 %% Algorithm
 %%
-% # Search the best TS model with the minimal MSE for $n_v=[2,3,4]$ and $\nu=[1.05,1.1,1.2,1.5,2]$.
+% # Search the best TS model with the minimal MSE for $n_v=\{2,3,4\}$ and $\nu=\{1.05,1.1,1.2,1.5,2\}$.
 % # Select the TS model with minimal MSE of $s$ multi-start tries for clustering and
-% LS-estimation. 
+% Least Squares estimation. 
 % # Optimize the TS model parameters $(v_i,B_i,c_i)$ for each try.
 
 %% Minimal required data
@@ -55,7 +56,7 @@
 % * inputs $u_1,u_2\in[0,2]$ 
 % * local model matrices 
 % $$ B = \begin{pmatrix} -4  & 4 \\ 4 & -2 \\ 2 & 1\end{pmatrix},\quad c = \begin{pmatrix} -2\\-4\\1 \end{pmatrix} $$ 
-% * FCM membership functions ($\nu=1.2$)
+% * FCM membership functions ($\nu=1.2$) with Euclidian norm
 % * cluster centers 
 % $$ v = \begin{pmatrix} 0.5 & 0.5 \\ 0.5 & 1.5 \\ 1.5 & 1 \end{pmatrix} $$
 
@@ -70,14 +71,14 @@ Par.nu = size( u, 2);
 % Number of clusters $n_v$ = number of local models ($n_v$ > 1)
 Par.nv = [ 2, 3, 4 ];
 %%
-% Fuzziness parameter (FCM: $\nu = [1.05,\ldots, 2]$, Gauss: $\sigma_i^2$)
+% Fuzziness parameter (FCM: $\nu = \{1.05,\ldots, 2\}$, Gauss: $\sigma_i^2$)
 Par.fuzzy = [ 1.05, 1.2 ,2.0 ];
 
 %% Optional settings
 % 
 % For more control over the approximation process.
 %% 
-% Multi-Start: number of tries $m$ (clustering & LS), default = 10
+% Multi-Start: number of tries $s$ (clustering & LS), default = 10
 Par.Tries = 10;
 %%
 % Clustering: Fuzzy C-Means (FCM) / Gustafson-Kessel (GK) / KMeans (KMeans), default = 'FCM'
@@ -112,7 +113,7 @@ Par.IterOpt = 'each';
 % Plot clusters and residuals: 'none'/'iter'/'final', default='final'
 Par.Plots = 'final';
 %%
-% Debug infos (0=none, 1=moderate, 2=detailed)
+% Debug infos of algorithm progess: (0=none, 1=info, 2=detailed)
 Par.Debug = 2;
 
 %% Estimation of  Static TS model parameters

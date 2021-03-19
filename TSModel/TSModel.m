@@ -49,7 +49,7 @@
 % Initialize A,B,C randomly or with ARX model
 
 
-classdef TSModel  < handle & matlab.mixin.Copyable
+classdef TSModel  < tsm_Base
     
     % ToDo: Static: kein t -> 1:n
     
@@ -69,7 +69,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
         ny = 1    % number of ouputs
         
         %% Data for model identification (Clustering/LS)
-        n_ident = 0    % number of data points
+        N_ident = 0    % number of data-points
         t_ident = [];  % time vector (n x 1 )
         u_ident = []   % vector(n x nu)
         y_ident = []   % vector(n x 1)
@@ -136,18 +136,13 @@ classdef TSModel  < handle & matlab.mixin.Copyable
         C = []     % matrix nv x 1
         
         Theta = [] % list of local model parameters
-        l_Type     % Type of local model initialisation LS local/LS global/random/manual
+        LS_type    % Type of local model initialisation LS local/LS global/random/manual
         
         maxlag = 0 % max( z_maxlag, x_maxlag )
         
         %% Parameter and results of optimization
         OptimPR
-        o_Type      % Type of optomizing local model parameters MF/LM/MF+LM
-        
-        %%
-        Name = ''
-        Comment = 'TS model'
-        Date = now
+        Opt_Type      % Type of optimizing local model parameters MF/LM/MF+LM
         
     end
     
@@ -161,13 +156,13 @@ classdef TSModel  < handle & matlab.mixin.Copyable
             end
             
             addpath( '../Functions' )
-           
+            
             p = inputParser;
             valFcn = @(x) isscalar(x) && x>0;
             p.addRequired( 'type', @ischar )
             p.addRequired( 'nv', valFcn )
             p.addRequired( 'nu', valFcn )
-            p.addParameter('Name','',@ischar)
+            p.addParameter('Name','undefined',@ischar)
             p.addParameter('Comment','',@ischar)
             p.addParameter('z_lag_u',{},@iscell)
             p.addParameter('z_lag_y',[],@ismatrix)
@@ -175,7 +170,9 @@ classdef TSModel  < handle & matlab.mixin.Copyable
             p.addParameter('x_lag_y',[],@ismatrix)
             p.parse( type, nv, nu, varargin{:} )
             opts = p.Results;
-            
+
+            obj@tsm_Base( opts.Name, opts.Comment );
+
             obj.Type = type;
             obj.nu = nu;
             obj.nv = nv;
@@ -202,10 +199,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                 otherwise
                     error( 'TSModel_ unnknown type <%s>',type )
             end
-            obj.Name = opts.Name;
-            obj.Comment = opts.Comment;
-            obj.Date = datetime('now');
-            
+                        
         end
         
         %% Set same lags for scheduling and regressor
@@ -347,7 +341,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
             if n_u ~= obj.nu
                 error( 'TSModel/setData:  dim u <> n x nu' )
             end
-            obj.n_ident = n;
+            obj.N_ident = n;
             obj.u_ident = u;
             
             if ~isempty( opts.t )
@@ -363,7 +357,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
             end
             
             [n,n_y] = size( y );
-            if n_y ~= 1 || n ~= obj.n_ident
+            if n_y ~= 1 || n ~= obj.N_ident
                 error( 'TSModel: dim y not n x 1' )
             end
             obj.y_ident = y;
@@ -372,7 +366,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
             obj = setDataLimits( obj, opts.Limits );
             obj = setDataComment( obj, opts.Comment );
             
-            obj.t_ident = [ 0:obj.n_ident-1 ]*obj.ts_ident;
+            obj.t_ident = [ 0:obj.N_ident-1 ]*obj.ts_ident;
             
         end
         
@@ -527,7 +521,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                     error( 'TSModel/initialize: unknown MSF <%s>', opts.msf)
             end
             
-            obj.l_Type = opts.method;
+            obj.LS_type = opts.method;
             
             switch obj.Type
                 case 'Static'
@@ -535,7 +529,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                     % Scheduling var = u / forget ProductSpace
                     obj.z = obj.z_fct( obj );
                     obj.zmu = obj.z_msf( obj.z(:,1:obj.nu), obj.v, obj.m );
-                    obj.z = [ obj.z(:,1:obj.nu), ones(obj.n_ident,1) ];
+                    obj.z = [ obj.z(:,1:obj.nu), ones(obj.N_ident,1) ];
                     
                     if strcmp( opts.method, 'local' ) % local LS
                         obj.Theta = [];
@@ -635,19 +629,19 @@ classdef TSModel  < handle & matlab.mixin.Copyable
             end
         end
         
-        %% Evaluate system at vectors u / u,y
+        %% Predict the TS model at vectors u / u,y
         function yp = predict( obj, u, y )
 
+            % Check A/B/C not empty (model not yet initialized)
             if isempty(obj.B)
                 error( 'tsModel/predict: matrix B empty' )
             end
             if isempty(obj.C)
                 error( 'tsModel/predict: matrix C empty' )
             end
+            
             switch obj.Type
-                
                 case 'Static'
-                    % Check A/B/C not empty (model not yet initialized)
                     yp = tsm_predict_Static( obj, u );
                 case 'ARX'
                     if isempty(obj.A) || isempty(obj.C)
@@ -659,7 +653,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
             end
         end
         
-        %%
+        %% Optimize the TS model parameters
         function obj = optimize( obj, method, varargin )
             
             p = inputParser;
@@ -683,14 +677,15 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                 optimopts = opts.optimopts;
             end
             
+            tic
             switch obj.Type
                 
                 case 'Static'
                     nvu = obj.nv*obj.nu;
-                    switch method
+                    switch upper(method(1))
                         case 'M' % optimize membership MF
                             % Limit v to range of u|y
-                            obj.o_Type = 'MF';
+                            obj.Opt_Type = 'MF';
                             lb = reshape( repmat(obj.Limits(1:obj.nu,1),1,obj.nv),1,nvu );
                             ub = reshape( repmat(obj.Limits(1:obj.nu,2),1,obj.nv),1,nvu );
                             x0 = [ reshape(obj.v,1,nvu) ];
@@ -698,9 +693,9 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                                 lsqnonlin( @(x) tsm_optimize_Static_MF( x,...
                                 obj.u_ident, obj )-obj.y_ident,...
                                 x0, lb,ub,optimopts);
-                            obj.v = reshape( x_opt(1:nvu), obj.nv, nvu );
+                            obj.v = reshape( x_opt(1:nvu), obj.nv, obj.nu );
                         case 'L' % optimize local models LM
-                            obj.o_Type = 'LM';
+                            obj.Opt_Type = 'LM';
                             lb = []; % no constraints for B/c
                             ub = [];
                             x0 = [ reshape(obj.B,1,nvu),...
@@ -714,7 +709,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                             n1 = n2 + 1; n2 = n1+obj.nv-1;
                             obj.C = reshape( x_opt(n1:n2),obj.nv,1 );
                         case 'B' % optimize MF and LM
-                            obj.o_Type = 'MF&LM';
+                            obj.Opt_Type = 'MF&LM';
                             lb = [ reshape( repmat(obj.Limits(1:obj.nu,1),1,obj.nv),1,nvu ),...
                                    -inf*ones(1,obj.nv*(obj.nu+1)) ];
                             ub = [ reshape( repmat(obj.Limits(1:obj.nu,2),1,obj.nv),1,nvu ),...
@@ -745,7 +740,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                     switch method
                         case 'M' % optimize membership MF
                             % Limit v to range of u|y
-                            obj.o_Type = 'MF';
+                            obj.Opt_Type = 'MF';
                             nu = obj.nB * obj.nu; % Lags beachten
                             lb = reshape( repmat(obj.Limits(1:obj.nu,1),1,obj.nv),...
                                 1,obj.nv*obj.nu );
@@ -757,7 +752,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                                 x0, lb,ub,optimopts);
                             obj.v = reshape( x_opt(1:obj.nv*obj.nu), obj.nv, obj.nu );
                         case 'L' % optimize local models LM
-                            obj.o_Type = 'LM';
+                            obj.Opt_Type = 'LM';
                             lb = [];
                             ub = [];
                             x0 = [ reshape(obj.B,1,obj.nv*obj.nu),...
@@ -771,7 +766,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                             n1 = n2 + 1; n2 = n1+obj.nv-1;
                             obj.C = reshape( x_opt(n1:n2),obj.nv,1 );
                         case 'B' % optimize MF and LM ( c | A | B C ]
-                            obj.o_Type = 'MF&LM';
+                            obj.Opt_Type = 'MF&LM';
                             % lag_y | lag_u
                             % v: z_lag_u | zlag_y
                             lb = [];
@@ -818,7 +813,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                     obj.OptimPR.output = output;
                     
                 case 'OE'
-                       obj.o_Type = 'MF&LM';
+                       obj.Opt_Type = 'MF&LM';
                             % c = [lag_y,lag_u)
                             %ToDo: u x nu
                              lb = [ repmat( ...
@@ -850,6 +845,8 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                             obj.C = reshape( p_opt(n1:n2),obj.nv,1 );
                         
             end
+            obj.debug(2,sprintf('Duration of optimization: %g s\n', toc))
+
         end
         
         function obj = setName( obj, name )
@@ -873,20 +870,21 @@ classdef TSModel  < handle & matlab.mixin.Copyable
         end
         
         function disp( obj )
-            fprintf( 'TS-Model: Type=%s', obj.Type )
-            if ~isempty( obj.Name )
-                fprintf( ', Name="%s"', obj.Name )
-            end
-            if ~isempty( obj.Date )
-                fprintf( ', [created: %s]', obj.Date )
-            end
-            if ~isempty( obj.Comment ) % for c in obj.Comment
-                fprintf( ' (%s)', obj.Comment )
-            end
-            fprintf( '\n Structural parameters: nu = %d, ny = %d, nv = %d', obj.nu, obj.ny, obj.nv )
+            fprintf( 'TS-Model: Type=%s\n', obj.Type )
+            disp@tsm_Base( obj )
+%             if ~isempty( obj.Name )
+%                 fprintf( ', Name="%s"', obj.Name )
+%             end
+%             if ~isempty( obj.Date )
+%                 fprintf( ', [created: %s]', obj.Date )
+%             end
+%             if ~isempty( obj.Comment ) % for c in obj.Comment
+%                 fprintf( ' (%s)', obj.Comment )
+%             end
+            fprintf( ' Structural parameters: nu = %d, ny = %d, nv = %d\n', obj.nu, obj.ny, obj.nv )
             
-            if obj.n_ident > 0
-                fprintf( '\n Identification data: N=%d', obj.n_ident )
+            if obj.N_ident > 0
+                fprintf( ' Identification data: N=%d\n', obj.N_ident )
                 if obj.ts_ident > 0
                     fprintf( ', ts=%g', obj.ts_ident )
                 end
@@ -895,7 +893,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                 end
             end
 
-            fprintf( '\n Initial model estimation:\n')
+            fprintf( ' Initial model estimation:\n')
             if ~isempty( obj.z_lag_u )
                 fprintf( ' lags: ')
                 for i=1:obj.nu
@@ -912,12 +910,17 @@ classdef TSModel  < handle & matlab.mixin.Copyable
             end
             switch obj.c_Type 
                 case'FCM'
-                    fprintf( '  Clustering: %s, nue=%g norm=%s\n', obj.c_Type, obj.nue, obj.c_Norm )
+                    fprintf( '  Clustering: %s, nue=%g norm=%s', obj.c_Type, obj.nue, obj.c_Norm )
                 case'Gauss'
-                    fprintf( '  Clustering: %s, sigma=%g\n', obj.c_Type, obj.sigma )
+                    fprintf( '  Clustering: %s, sigma=%g', obj.c_Type, obj.sigma )
             end
-            
-            fprintf( 'Estimation of local models:\n')
+            if obj.ProductSpace
+                    fprintf( ' in product space\n')
+            else
+                    fprintf( ' in input space\n')
+            end
+                
+            fprintf( ' Estimation of local models:\n')
             if ~isempty( obj.x_lag_u )
                 fprintf( ' lags:  ')
                 for i=1:obj.nu
@@ -927,12 +930,12 @@ classdef TSModel  < handle & matlab.mixin.Copyable
             if ~isempty( obj.z_lag_y )
                 fprintf( '  y = %s\n', mat2str(obj.x_lag_y) )
             end
-            if obj.l_Type
-                fprintf( ' Initialization of local models: %s\n', obj.l_Type )
+            if obj.LS_type
+                fprintf( '  Initialization of local models: %s\n', obj.LS_type )
             end
             
-            if obj.o_Type
-                fprintf( ' Optimization of model parameters: %s\n', obj.o_Type )
+            if obj.Opt_Type
+                fprintf( '  Optimization of model parameters: %s\n', obj.Opt_Type )
             end
         end
         
@@ -965,7 +968,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                     if ~isempty( obj.z )
                         plot( obj.z(:,i1),obj.z(:,i2),'k.', 'MarkerSize',8 )
                         hold on
-                        l{end+1} = 'data points';
+                        l{end+1} = 'data-points';
                     end
                     plot( v(:,i1), v(:,i2), 'rx', 'MarkerSize', 12 )
                     if ~isempty( obj.Limits )
@@ -1030,7 +1033,7 @@ classdef TSModel  < handle & matlab.mixin.Copyable
                 grid on
                 ylabel( sprintf('u_{%d}',i ) )
                 if is ==1
-                    title( sprintf( 'Identification data N=%d data-points', obj.n_ident ) )
+                    title( sprintf( 'Identification data N=%d data-points', obj.N_ident ) )
                 end
             end
             for i=1:ny

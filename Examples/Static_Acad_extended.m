@@ -2,6 +2,8 @@
 %
 % Static LiP model for an academic example with extendend results.
 %
+% V1.0
+%
 % Axel Dürrbaum (<axel.duerrbaum@mrt.uni-kassel.de>)
 %
 % Department of Measurement and Control (MRT)
@@ -16,22 +18,23 @@
 %%
 % 
 % Example of automatic identification of a static MISO LiP TS model for 
-% given inputs $u$ and output $y$ and selected structural parametes from the auto-example "Static_Aced_auto.m".
+% given multiple inputs $u$ and single output $y$ and selected structural parametes from the auto-example "Static_Acad_auto.m".
 
+%% Algorithm
+%
 %%
-% Algorithm:
-%%
-% # Select best results from the auto example: $n_v=3$ and $\nu=1.2$
 % # Select the TS model with minimal MSE of $m$ multi-start tries with clustering and
 % LS-estimation. 
 % # Optimize the TS model parameters $(v_i,B_i,c_i)$ for each try or the best found model.
 
 %% Minimal required data
 %
-% * Inputs $u\in\mathbb{R}^{N \times n_u}$ and output $y\in\mathbb{R}^N$, each with $N$ data points
+% Inputs $u\in\mathbb{R}^{N \times n_u}$ and output $y\in\mathbb{R}^N$, each with $N$ data points
 
 %% Additional choices
 %
+% Choosen are  the best parameters from the "Static auto" example:
+%%
 % # Number of local models $n_v = 3$
 % # Fuzziness parameter $\nu = 1.2$
 
@@ -48,14 +51,14 @@ Par.nu = size( u, 2);
 Par.nv = 3;
 
 %%
-% Fuzziness parameter (FCM: $\nu = [1.05,\ldots, 2]$, Gauss: $\sigma_i^2$, 0=select range)
+% Fuzziness parameter (FCM: $\nu = [1.05,\ldots, 2]$, Gauss: $\sigma_i^2$, 0=auto-select)
 Par.fuzzy = 1.2;
 
 %% Optional settings
 % 
 % For more control over the approximation process.
 %% 
-% Multi-Start: number of tries $m$ (clustering & LS), default = 10
+% Multi-Start: number of tries $s$ (clustering & LS), default = 10
 Par.Tries = 10;
 %%
 % Clustering: Fuzzy C-Means (FCM) / Gustafson-Kessel (GK) / KMeans (KMeans), default = 'FCM'
@@ -90,7 +93,7 @@ Par.IterOpt = 'each';
 % Plot clusters and residuals: 'none'/'iter'/'final', default='final'
 Par.Plots = 'final';
 %%
-% Debug infos (0=none, 1=info, 2=detailed)
+% Debug infos of algorithm progess: (0=none, 1=info, 2=detailed)
 Par.Debug = 1;
 
 %% Estimation of  Static TS model parameters
@@ -101,87 +104,89 @@ model = TSM_Static_auto( u, y, Par );
 %% Validation of the TS model
 %
 %%
-% As validation data, use random inputs $u_{test}\in [0,2]\times[0,2]$ 
-% with $N=2000$ data points 
-u_test = 2 * rand( 2000, Par.nu );
-y_test = model.predict( u_test );
+% As validation data, use random inputs $u_{val}\in [0,2]\times[0,2]$ 
+% with $N_{val}=2000$ data-points 
+N_val = 2000;
+u_val = 2 * rand( N_val, Par.nu ); 
+y_val = model.predict( u_val );
 %%
 % Plot of model outputs for random test input data:
 he = figure( 10 );
 plot3( u(:,1), u(:,2),y,'b.', ...
-       u_test(:,1), u_test(:,2), y_test,'r.','MarkerSize',8);
-legend( 'u_{ident}', 'u_{test}','Location','NW' )
+       u_val(:,1), u_val(:,2), y_val,'r.','MarkerSize',8);
+legend( 'y_{ident}', 'y_{val}','Location','NW' )
 grid on
 xlabel('u_1'),ylabel('u_2'),zlabel('y')
-title( 'Static auto: random test data' )
+title( 'Static auto: random validation data' )
 set(gca,'FontSize', 14)
-he.WindowState = 'maximized';
+set(gcf,'WindowState','maximized');
 
 %%
-% For grid type distributed test data, use $n$ points per input $u_i$
-n = 40;
-[U1,U2] = meshgrid( linspace(0,2,n), linspace(0,2,n) );
-u_grid = [ U1(1:end)', U2(1:end)' ];
+% For grid type distributed test data, use $N_{grid}=40$ data-points per input $u_i$
+N_grid = 40;
+[U1_grid,U2_grid] = meshgrid( linspace(0,2,N_grid), linspace(0,2,N_grid) );
+u_grid = [ U1_grid(1:end)', U2_grid(1:end)' ];
 y_grid = model.predict( u_grid );
-Y = reshape( y_grid,n,n );
+Y_grid = reshape( y_grid,N_grid,N_grid );
 %%
 % Plot of model output for grid input data:
 hg = figure( 11 );
-plot3( U1, U2, Y, 'k.')
+plot3( U1_grid, U2_grid, Y_grid, 'k.')
 grid on
 xlabel('u_1'),ylabel('u_2'),zlabel('y')
 title( 'Static auto: grid data' )
 set(gca,'FontSize', 14)
 hg.WindowState = 'maximized';
 
-%% Plot the final TS model in 2D
+%% Plot final TS model
 %
-% Get the membership degrees for the grid data
-mu = getMSF( model, u_grid, y_grid );
-
+% Compute the membership degrees for the grid data
+mu_grid = getMSF( model, u_grid, y_grid );
+%%
+% Plot the membership degrees  $\phi$ in 2D
 figure(12),clf
 hold on
 plot( v(:,1), v(:,2),'rx' )
 for i=1:model.nv
-    contour( U1,U2, reshape(mu(:,i),n,n), 1 )
+    contour( U1_grid,U2_grid, reshape(mu_grid(:,i),N_grid,N_grid), 1 )
 end
 hold off
 axis square
 grid on, box on
 view(0,90)
-xlabel('u_1'),ylabel('u_2'),zlabel('\mu(z)')
+xlabel('u_1'),ylabel('u_2'),zlabel('\phi(z)')
 title( 'Cluster centers' )
-legend( 'v', '\mu_i=0.5' )
-
+legend( 'v', '\phi_i=0.5' )
 set(gca,'FontSize', 14)
-hg.WindowState = 'maximized';
-
+set(gcf,'WindowState','maximized');
+%%
+% Plot the membership degrees $\phi$ in 3D
 figure(13),clf
 hold on
 for i=1:model.nv
-    meshc( U1,U2, reshape(mu(:,i),n,n) )
+    meshc( U1_grid,U2_grid, reshape(mu_grid(:,i),N_grid,N_grid) )
 end
 hold off
 axis square
 view(-20,40)
-xlabel('u_1'),ylabel('u_2'),zlabel('\mu(z)')
+xlabel('u_1'),ylabel('u_2'),zlabel('\phi(z)')
 title( 'Membership degrees' )
 set(gca,'FontSize', 14)
-set(gca,'FontSize', 14)
-hg.WindowState = 'maximized';
+set(gcf,'WindowState','maximized');
 
+%%
+% Plot the TS model output $y$ in 3D
 figure(14),clf
 hold on
 plot3( u(:,1),u(:,2),y,'k.' )
-surf( U1,U2, reshape(Y,n,n) )
+mesh( U1_grid,U2_grid, reshape(Y_grid,N_grid,N_grid) )
 hold off
 title( 'Predicted TS model' )
 xlabel('u_1'),ylabel('u_2'),zlabel('y')
 grid on, box on
 axis square
 view(-20,40)
-xlabel('u_1'),ylabel('u_2'),zlabel('\mu(z)')
-
+xlabel('u_1'),ylabel('u_2'),zlabel('\phi(z)')
 set(gca,'FontSize', 14)
-hg.WindowState = 'maximized';
+set(gcf,'WindowState','maximized');
 

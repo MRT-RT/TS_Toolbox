@@ -38,6 +38,7 @@ $rev =~ /^commit (.*)$/m;
 $ident = $1;
 $vers=`git describe --tags --long`;
 $vers =~ s/\R//g;
+
 while (<STDIN>) {
     s/\$Date[^\$]*\$/\$Date: $date \$/;
     s/\$Author[^\$]*\$/\$Author: $author \$/;
@@ -45,6 +46,7 @@ while (<STDIN>) {
     s/\$File[^\$]*\$/\$File: $filename \$/;
     s/\$Source[^\$]*\$/\$Source: $path \$/;
     s/\$Revision[^\$]*\$/\$Revision: $ident \$/;
+    s/\$Version[^\$]*\$/\$Version: $vers \$/;
 } continue {
     print or die "-p destination: $!\n";
 }

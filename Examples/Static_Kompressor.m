@@ -21,8 +21,8 @@ addpath( '../TSModel' )
 %% Identification data 
 % Input vector u and output vector y
 load( 'Data/Kompressor.mat' );
-u = [ KompDaten.x1, KompDaten.x2 ];
-y = KompDaten.y;
+u_val = [ KompDaten.x1, KompDaten.x2 ];
+y_val = KompDaten.y;
 dt = 1; % Implicit sampling time for static models
 
 
@@ -35,7 +35,7 @@ MSF  = 'FCM'; % FCM type membership functions
 %% Estimatiuon of TS model
 ts = TSModel( 'Static', nc, nu, 'Name','LiP','Comment','Compressor');
 
-ts.setData( u, y, 'SampleTime',dt, 'Labels', { 'p_R','eta', 'dm/dt' } );
+ts.setData( u_val, y_val, 'SampleTime',dt, 'Labels', { 'p_R','eta', 'dm/dt' } );
 ts.setDataLimits( [0.2,1 ; 1,2.2; 0,200] );
 
 %% 
@@ -48,19 +48,22 @@ v1 = getCluster( ts );
 ts.initialize( 'FCM', 'nue', nu, 'method','global'  );
 
 %% 
-% Compute TS model for observed input data
-y_pred = ts.predict( u );
-plotResiduals( y, y_pred, 'figure', 4, 'title', 'Compressor: correlation' );
+% Predict the TS model for observed input data
+y_pred = ts.predict( u_val );
+plotResiduals( y_val, y_pred, 'figure', 4, 'title', 'Compressor: correlation' );
 
 %% 
-% Optimize TS model: clusters $v$  and local models $B,c$
-tic
+% Optimize TS model: optimize only cluster centers $v$ 
 ts.optimize( 'M' );
-fprintf('Duration of optimization: %g s\n', toc)
 v2 = getCluster( ts );
 
 %%
 % Plot the correlation
-y_pred_opt = ts.predict( u );
-plotResiduals( y, y_pred_opt, 'figure', 5, 'title', 'Compressor optimized: corrlation' );
+y_pred_opt = ts.predict( u_val );
+plotResiduals( y_val, y_pred_opt, 'figure', 5, 'title', 'Compressor opt: correlation' );
+
+% Plot the correlation histogram
+hv = plotResidualHist( y_val, y_pred_opt, 'nbins',21, ...
+        'figure', 6, 'title', 'Compressor opt: correlation histogram','nbins',21 );
+hv.WindowState = 'maximized';
 

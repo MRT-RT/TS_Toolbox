@@ -1,7 +1,8 @@
 %% Takagi-Sugeno Model Identification Toolbox
 %
-% Example of a throttle valve as a nonlinear ARX model LiP TS model (NARX)
+% Example of a throttle valve as a nonlinear ARX model TS model (NARX)
 %
+% V1.0
 %
 % Axel Dürrbaum (<axel.duerrbaum@mrt.uni-kassel.de>)
 %
@@ -15,20 +16,19 @@
 % $Id$
 
 %%
-% Estimation of a NARX LiP TS model from the measurement data from a throttle
+% Estimation of a NARX TS model from the measurement data of a throttle
 % valve
 %%
-% $$ y_{k+1} = \sum_{i=1}^{n_v} \mu_i(z) \cdot \left( \sum A_i\cdot x_y +
-% B_i\cdot x_u + c_i \right) $$
+% $$ y_{k+1} = \sum_{i=1}^{n_v} \phi_i(z) \cdot \left( \sum A_{i}\cdot x_y +
+% B_{i}\cdot x_u + c_i \right) $$
 % with
 %%
 % 
 % * scheduling vector $z=[y_{k-1},y_{k-2},y_{k-3},u_k]$
-% * FCM clustering in product-space with 3 tries
+% * FCM clustering in product-space with $s=10$ tries
 % * regression vector $x=[x_y,x_u]$, $x_y=[y_{k-1},y_{k-2},y_{k-3}]$ and $x_u=[u_k]$
-% * initalization of the local models with a global Least-Squares
-% * optimization of the parametes of the cluster centers $v$ and the local
-% models $A,B,c$
+% * initalization of the local models with global least squares
+% * optimization of the parameters: both cluster centers $v$ and local models $A_i,B_i,c_i$
 
 %%
 % Path to TSModel class
@@ -45,21 +45,26 @@ MSF = 'FCM';
 %
 % Load input vector $u$ and output vector $y$ from file:
 load( 'Data/Throttle1.mat' );
+
 %%
-% Compute the time vector
+% Compute the time vector (for plotting)
 dt = 1e-2; % Sampling time
 t = dt * transpose( 0:size(u,1)-1 );
 
 %% Creation of the TS model
 ts = TSModel( 'ARX', nv, nu, 'Name','NARX', 'Comment','Throtte valve');
+
 %%
 % Set the identification data
 ts.setData( u, y, 'SampleTime',dt, 'Labels', { 'volt', 'angle' } );
+%%
+% Limit $u=[-20;45]$ and $y=[0;5]$
 ts.setDataLimits( [-20,45 ; 0,5] );
+
 %%
 % Plot the identification data
-hp=plotIdentData( ts );
-hp.WindowState = 'maximized';
+plotIdentData( ts );
+set(gcf, 'WindowState', 'maximized' );
 
 %%
 % Set the scheduling lags:  u(k), y(k-1), y(k-2),  y(k-3)
@@ -70,8 +75,8 @@ ts.setRegressorLags( [0], [1,2,3] );
 
 %% Clustering 
 %
-% Clustering is done in product-space (u,y) with FCM and $\nu=1.1$ for a
-% multi-start of 10 tries and random number fixed initialized (Seed)
+% Clustering is done in product-space $[u,y]$ with FCM and $\nu=1.1$ for a
+% multi-start of $s=10$ tries and random number generator fixed initialized with seed 0
 ts.clustering( 'FCM', 'nue', nue, 'tries',10, 'seed', 0 );
 %%
 % Cluster centers $v_1$: (columns $z=[y_{k-1},y_{k-2},y_{k-3},u_k]$, rows=local models)
@@ -87,8 +92,8 @@ ts.initialize( MSF, 'nue', nue, 'method','global'  );
 %
 % Prediction of the NARX TS model with the identificaton input: $u$
 y_pred = ts.predict( u,y );
-hi=plotResiduals( y, y_pred, 'figure', 2, 'title', 'Residuals Throttle NARX' );
-hi.WindowState = 'maximized';
+plotResiduals( y, y_pred, 'figure', 2, 'title', 'Residuals Throttle NARX' );
+set(gcf, 'WindowState', 'maximized' );
 
 %% Optimization of the TS model
 %
@@ -104,5 +109,41 @@ v2 = getCluster( ts )
 %% Prediction of the optimized TS model
 %
 y_pred_opt = ts.predict( u,y );
-ho=plotResiduals( y, y_pred_opt, 'figure', 3, 'title', 'Residuals Throttle NARX opt' );
-ho.WindowState = 'maximized';
+%%
+% Plot the correlation
+plotResiduals( y, y_pred_opt, 'figure', 3, 'title', 'Residuals Throttle NARX opt' );
+set(gcf, 'WindowState', 'maximized' );
+
+%%
+% Plot identification and predicted output $y$
+figure(4),clf
+subplot(4,1,1:2)
+plot( t,y,'k-',t,y_pred,'r--',t,y_pred_opt,'g-.')
+grid on
+ylabel('y')
+legend('y_{obsv}','y_{pred}','y_{prod.opt}','Location','best')
+title( 'Throttle: predicted vs. observed data-points' )
+subplot(4,1,3)
+plot( t,y-y_pred,'k-')
+grid on
+ylabel('y-y_{pred}')
+subplot(4,1,4)
+plot( t,y_pred-y_pred_opt,'k-')
+grid on
+ylabel('y_{pred}-y_{pred,opt}')
+xlabel( 'time t' )
+set(gcf, 'WindowState', 'maximized' );
+
+%%
+figure(5),clf
+hold on
+plot(u,y,'k.')
+plot(v1(:,1),v1(:,2),'rs','MarkerSize',12)
+plot(v2(:,1),v2(:,2),'bd','MarkerSize',12)
+grid on
+box on
+xlabel( 'u' )
+ylabel( 'y' )
+title( 'Throttle: cluster centers v')
+legend( 'data-points','v FCM', 'v opt' )
+set(gcf, 'WindowState', 'maximized' );

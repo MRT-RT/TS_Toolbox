@@ -54,12 +54,14 @@ classdef tsm_Base < handle & matlab.mixin.Copyable
         function self = addComment( self, comment )
             % add comment
             % input: comment: array co char
-            if iscell( comment )
-                for c = comment
-                    self.Comment = [self.Comment, c];
+            if not( isempty( comment ) )
+                if iscell( comment )
+                    for c = comment
+                        self.Comment = [self.Comment, c];
+                    end
+                else
+                    self.Comment = [self.Comment, comment];
                 end
-            else
-                self.Comment = [self.Comment, comment];
             end
         end
         
@@ -108,7 +110,7 @@ classdef tsm_Base < handle & matlab.mixin.Copyable
         function debug( self, message, level )
             % debug messages
             % input: level = integer > 0
-            if level >= self.Debug
+            if level <= self.Debug
                 fprintf( '%s\n', message )
             end
         end
