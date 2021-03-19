@@ -50,10 +50,10 @@ clf
 
 % time vector given?
 if model.ts_ident > 0
-    t = [ 0 : model.n_ident-1 ] / model.ts_ident;
+    t = [ 0 : model.N_ident-1 ] / model.ts_ident;
 else
-    t = [ 1 : model.n_ident ];
-    opts.labels{1} = 'data points';
+    t = [ 1 : model.N_ident ];
+    opts.labels{1} = 'data-points';
 end
 
 % number of diagrams: u and activation (double height)
