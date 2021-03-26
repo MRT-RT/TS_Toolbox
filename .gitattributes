@@ -2,3 +2,4 @@
 # Map file extensions to git filters
 
 *.m filter=rcs-keywords
+*.txt filter=rcs-keywords
