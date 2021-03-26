@@ -1,5 +1,7 @@
 # git: ignore files
 # backups
+.git_getrevision.sh
+.git_mkfooter.sh
 *.*~
 *.bak 
 *.BAK
@@ -7,9 +9,7 @@
 Archiv/
 Backups/
 Dists/
+Tests/
 Documentation/
-TSModel/html/TSModel_*.png
-TSModel/html/tsm_Manual_*.png
-Examples/*.pdf
-Examples/*.png
-Examples/html
+TSModel/html/
+Examples/html/

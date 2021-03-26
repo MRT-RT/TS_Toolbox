@@ -9,6 +9,7 @@ classdef tsm_Base < handle & matlab.mixin.Copyable
     end
     
     properties
+        Type         % type of object 
         Name = ''    % Name of object
         Date = ''    % Date of creation
         Comment = {} % Comments to object

@@ -63,10 +63,13 @@ classdef TSModel  < tsm_Base
             'eMail', 'axeld@uni-kassel.de' )
         
         %% Model order
-        Type      % Type of TS model = Static/NARX/NOE
         nv        % number of clusters v
         nu        % number of inputs
         ny = 1    % number of ouputs
+        
+        %% Premise and conclusion parts
+        prem      % premise (tsm_Prem object, clustering type)
+        conc      % conclusion (tsm_Conc object, local models type)
         
         %% Data for model identification (Clustering/LS)
         N_ident = 0    % number of data-points

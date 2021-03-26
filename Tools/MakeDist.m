@@ -12,12 +12,12 @@
 % Ausgabe:
 %  datei: vollständiger Pfad zum ZIP-Archiv
 
-function datei = MakeDist( datei, verzeichnis )
+% Tip: git archive --format zip --output "output.zip" master -0
 
-%% Zielverzeichnis für Backups
-if nargin < 2
-   verzeichnis = 'TS_Toolbox/Dists';
-end
+function datei = MakeDist( datei )
+
+cd( '../..' )
+verzeichnis = 'TS_Toolbox/Dists';
 
 %% Backup als ZIP-Datei erstellen
 if ~exist( verzeichnis, 'dir' )
@@ -35,19 +35,19 @@ end
 
 
 %% Erstellen ZIP-Archiv
-if exist( '../TSModel', 'dir' ) % in Tools
-    cd( '..' )
-end
-
-cd( '..' )
-pwd
 
 datei = sprintf('%s/%s', verzeichnis,datei );
 zip( datei, ...
     { 'TS_Toolbox/TSModel/*.m' ; 
+      'TS_Toolbox/TSModel/@tsm_Base/*.m' ; 
+      'TS_Toolbox/TSModel/@tsm_Conc/*.m' ; 
+      'TS_Toolbox/TSModel/@tsm_Prem/*.m' ; 
+      'TS_Toolbox/TSModel/@tsm_DataSet/*.m' ; 
       'TS_Toolbox/Examples/*.m' ; 
+      'TS_Toolbox/Examples/*.pdf' ; 
       'TS_Toolbox/Examples/Data/*' ;
       'TS_Toolbox/Functions/*.m' ; 
       'TS_Toolbox/*.pdf' } )
-%
+
+%%
 dir( [ verzeichnis, '/*.zip' ] )
