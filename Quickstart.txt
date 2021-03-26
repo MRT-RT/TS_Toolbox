@@ -1,0 +1,22 @@
+Quickstart for the TS Toolbox
+
+Look at the examples in the directory "TS_Toolbox/Examples"
+
+The PDF are created with the Matlab command "publish" and show 
+- the instructions, 
+- the Matlab commands and 
+- the output of the commands.
+
+
+1. Static_Acad_auto
+2. Static_Acad_extended
+3. Stactic_Friedman2D_auto
+4. Stactic_Friedman3D
+5. NARX_Narendra
+6. NOE_Narendra
+7. NARX_MISO_Ladedruck
+
+Contact:
+Axel Dürrbaum (axel.duerrbaum@mrt.uni-kassel.de)  
+
+$Id$
