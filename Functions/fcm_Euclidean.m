@@ -1,10 +1,10 @@
-%% fcm_Euclidian
-% The function fcm_Euclidian performs Fuzzy-C-Means clustering with an
+%% fcm_Euclidean
+% The function fcm_Euclidean performs Fuzzy-C-Means clustering with an
 % euclidean distance measure.
 
 % $Id$
 
-function [v, distout, J ] = fcm_Euclidian(data, cluster, options)
+function [v, distout, J ] = fcm_Euclidean(data, cluster, options)
 
 
 % get parameters
