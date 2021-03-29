@@ -22,7 +22,7 @@ nu = 2;
 % Choose the fuzziness parameter $\nu = 1.2$
 nue = 1.2;
 %%
-% Choose the input matrix $u$ as random data with $N$ data-points: $u_1,u2\in[0,1]$
+% Choose the input matrix $u$ as random data with $N$ data-points: $u_1,u_2\in[0,1]$
 N = 500;
 u = rand( N, nu );
 %%
@@ -35,7 +35,7 @@ Par.nu = size( u, 2);
 %%
 % Number of clusters $n_v$ = number of local models ($n_v$ > 1): 
 %%
-% 0 = select range $n_v=2,\ldots,n_{v,\max}$  with $n_{v,\max} = N / ( 10 * (2*n_u+1)$
+% 0 = select range $n_v=2,\ldots,n_{v,\max}$  with $n_{v,\max} = N / ( 10\cdot(2\cdot n_u+1)$
 Par.nv = 0;  
 %%
 % Fuzziness parameter (FCM: $\nu = \{1.05,\ldots, 2\}$, Gauss: $\sigma^2$)
@@ -45,7 +45,7 @@ Par.fuzzy = nue;
 % 
 % For more control over the approximation process.
 %% 
-% Multi-Start: number of tries $s$ (clustering & LS), default = 10
+% Multi-Start: number of tries $s$ (clustering & Least-Squares), default = 10
 Par.Tries = 3;
 %%
 % Clustering: Fuzzy C-Means (FCM) / Gustafson-Kessel (GK) / KMeans (KMeans), default = 'FCM'
@@ -54,8 +54,8 @@ Par.Clustering = 'FCM';
 % Clustering in product space:  $u$ and $y$ (true) or only input space $u$ (false)
 Par.ProductSpace = true;
 %%
-% Norm for clustering: 'Euclidian' or 'Mahalanobis', default = 'Euclidian'
-Par.Norm = 'Euclidan';
+% Norm for clustering: 'Euclidean' or 'Mahalanobis', default = 'Euclidean'
+Par.Norm = 'Euclidean';
 %%
 % Membership functions: 'FCM' clustering or 'Gauss' type
 Par.MSF = 'FCM';
@@ -109,7 +109,7 @@ disp( model )
 u_val = rand( N, nu );
 y_val_obsv = Friedman_fct( u_val, nu );
 %%
-% Compute output vector $y_{val,pred}$
+% Compute output vector $y_{\mathrm{val,pred}}$
 y_val_pred = model.predict( u_val );
 
 %% 
@@ -120,7 +120,7 @@ plot( 1:N, y_val_obsv, 'k-',1:N, y_val_pred, 'r--' )
 grid on
 ylabel('y')
 title( 'Friedman-2D: validation' )
-legend( 'y_{obsv}','y_{pred}' )
+legend( 'y_{\mathrm{obsv}}','y_{\mathrm{pred}}' )
 subplot(3,1,3)
 plot( 1:N, y_val_obsv- y_val_pred, 'k-' )
 grid on

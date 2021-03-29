@@ -19,7 +19,7 @@
 % Use the 3-dimensional Friedman function: 
 nu = 3;
 %%
-% $$ y = 10\cdot\sin( \pi\cdot u_1 \cdot u_2 + 20\cdot(u_3-0.5)^2 $$
+% $$ y = 10\cdot\sin( \pi\cdot u_1 \cdot u_2 ) + 20\cdot(u_3-0.5)^2 $$
 %%
 % Choose the fuzziness parameter $\nu = 1.2$
 nue = 1.2;
@@ -49,7 +49,7 @@ ts.setData( u, y );
 %%
 % Clustering:
 %%
-% * FCM: fuzziness parameter $\nu=1.2$ with Euclidian norm (default)
+% * FCM: fuzziness parameter $\nu=1.2$ with Euclidean norm (default)
 % * clustering in product-space
 % * Multi-Start: 5 tries
 ts.clustering( MSF, 'nue', nue, 'productspace', true, 'tries', 5 );
@@ -72,7 +72,7 @@ v = getCluster( ts )
 ts.plotCluster( v, 'figure',1);
 
 %%
-% Predict the TS model output: $y_{pred}$
+% Predict the TS model output: $y_{\mathrm{pred}}$
 y_pred = ts.predict( u, y );
 
 %%
@@ -96,7 +96,7 @@ set(gcf,'WindowState','maximized');
 u_val = rand( N, nu );
 y_obsv = Friedman_fct( u_val, nu );
 %%
-% Compute the output vector: $y_{pred}$
+% Compute the output vector: $y_{\mathrm{pred}}$
 y_val_pred = ts.predict( u_val );
 %%
 % Plot the outputs
@@ -106,7 +106,7 @@ grid on
 xlabel('k')
 ylabel('y')
 title( 'Friedman-3D: Validation' )
-legend( 'y_{obsv}','y_{pred}' )
+legend( 'y_{\mathrm{obsv}}','y_{\mathrm{pred}}' )
 set(gcf,'WindowState','maximized');
 %%
 % Plot the correlation 

@@ -56,7 +56,7 @@
 % * inputs $u_1,u_2\in[0,2]$ 
 % * local model matrices 
 % $$ B = \begin{pmatrix} -4  & 4 \\ 4 & -2 \\ 2 & 1\end{pmatrix},\quad c = \begin{pmatrix} -2\\-4\\1 \end{pmatrix} $$ 
-% * FCM membership functions ($\nu=1.2$) with Euclidian norm
+% * FCM membership functions ($\nu=1.2$) with Euclidean norm
 % * cluster centers 
 % $$ v = \begin{pmatrix} 0.5 & 0.5 \\ 0.5 & 1.5 \\ 1.5 & 1 \end{pmatrix} $$
 
@@ -87,8 +87,8 @@ Par.Clustering = 'FCM';
 % Clustering in product space:  $u$ and $y$ (true) or only input space $u$ (false)
 Par.ProductSpace = true;
 %%
-% Norm for clustering: 'Euclidian' or 'Mahalanobis', default = 'Euclidian'
-Par.Norm = 'Euclidan';
+% Norm for clustering: 'Euclidean' or 'Mahalanobis', default = 'Euclidean'
+Par.Norm = 'Euclidean';
 %%
 % Membership functions: 'FCM' or 'Gauss' type clustering
 Par.MSF = 'FCM';

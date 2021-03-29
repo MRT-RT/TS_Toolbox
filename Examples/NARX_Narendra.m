@@ -21,7 +21,7 @@
 %% 
 % Determine the NARX TS model
 %
-% $$ \hat{y}_{k+1} = \sum_{i=1}^{n_v} \phi_i(z) \cdot \left( \sum_{l=0}^{l_y} A_{i}\cdot y_{k-l} + \sum_{j=0}^{n_u}\sum_{l=0}^{l_u} B_{i,j}\cdot u_{k-l} + c_{i} \right)$$
+% $$ \hat{y}_{k+1} = \sum_{i=1}^{n_v} \phi_i(z) \cdot \left( \sum_{l=1}^{l_y} A_{i}\cdot y_{k-l} + \sum_{j=1}^{n_u}\sum_{l=0}^{l_u} B_{i,j}\cdot u_{k-l} + c_{i} \right)$$
 %%
 % * for given $u_j, j=1,\ldots,n_u$ of $n_u$ input vectors and 
 % * input lags $x_u$ with length $l_u$

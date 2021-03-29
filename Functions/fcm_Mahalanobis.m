@@ -1,7 +1,7 @@
 %% fcm_Mahalanobis
 %
-% The function fcm_Mahalanobis performs Fuzzy-C-Means clustering with an
-% euclidean distance measure.
+% The function fcm_Mahalanobis performs Fuzzy-C-Means clustering with the
+% Mahalanobis distance measure.
 
 % $Id$
 

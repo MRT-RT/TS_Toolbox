@@ -21,7 +21,7 @@
 %% 
 % Determine the NOE TS model
 %
-% $$ \hat{y}_{k+1} = \sum_{i=1}^{n_v} \phi_i(z) \cdot \left( \sum_{l=0}^{l_y} A_{i}\cdot \hat{y}_{k-l} + \sum_{j=0}^{n_u}\sum_{l=0}^{l_u} B_{i,j}\cdot u_{k-l} + c_{i} \right) + e_k$$
+% $$ \hat{y}_{k+1} = \sum_{i=1}^{n_v} \phi_i(z) \cdot \left( \sum_{l=1}^{l_y} A_{i}\cdot \hat{y}_{k-l} + \sum_{j=1}^{n_u}\sum_{l=0}^{l_u} B_{i,j}\cdot u_{k-l} + c_{i} \right) + e_k$$
 %%
 % * for given $u_j, j=1,\ldots,n_u$ of $n_u$ input vectors, output error $e$ and 
 % * input lags $x_u$ with length $l_u$
@@ -56,10 +56,10 @@ x_lag_y = [2];
 % Create input $u$ as steps with width $l=[1,\ldots,20]$ for $N=1000$ time
 % steps (sampling rate is 0.01) and compute the output $y$ from the Narendra function 
 N = 1000;
-dt = 1e-2;                           % Sampling time
-t = dt * transpose( 0:size(u,1)-1 ); % time vector $t$
 rng(0);
 [u,y] = Narendra_fct( N );
+dt = 1e-2;                           % Sampling time
+t = dt * transpose( 0:size(u,1)-1 ); % time vector $t$
 %% 
 % Plot of the identification data
 h=figure(1);clf
@@ -173,4 +173,6 @@ xlabel( 'time t' )
 title('Narendra NOE opt: predicted validation output')
 legend('u','y_{obsv}','y_{pred}')
 set(gcf,'WindowState', 'maximized' );
-
+%%
+% Error criteria
+ec_val = ErrorCriteria( y_val_pred,y_val)

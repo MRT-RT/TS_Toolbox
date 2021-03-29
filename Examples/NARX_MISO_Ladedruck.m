@@ -22,8 +22,8 @@ dt = 1; % Implicit sampling time for static models
 %% Create TS model
 ts = TSModel( 'ARX', nc, nu, 'Name','Ladedruck',...
 'Comment','IAV Überlandfahrt 24.3.2013 Konstante Einspritzcharakteristik');
-ts.setFuziness( nue );
-ts.set_msf_type( 'FBF' );
+ts.setFuzziness( nue );
+ts.set_msf_type( 'FCM' );
 ts.setSchedulingLags( {0,0,0,0,0}, [1,2,3] );
 ts.setRegressorLags( {0,0,0,0,0}, [1,2,3] );
 
@@ -64,25 +64,16 @@ for i1=1:nu
         hold off
     end
 end
-orient landscape
-print('-dpdf','-bestfit','Test_SISO_Ladedruck_clustering.pdf')
 
-%% Initial modell
-ts.initialize( 'FBF', 'nue', nue, 'method','global'  );
+%% Initial model
+ts.initialize( 'FCM', 'nue', nue, 'method','global'  );
 
 %% Evaluation of initial modell
-yp = ts.evaluate( u,y );
+yp = ts.predict( u,y );
 plotResiduals( y, yp, 'figure', 2, 'title', 'Residuals Throttle NARX' );
-orient landscape
-print('-dpdf','-bestfit','Test_SISO_Ladedruck.pdf')
-
-return
 
 %% Optimize Clusters c (MF) and/or local model A/B/C
 ts.optimize( 'B' )
 c2 = getCluster( ts );
-ypo = ts.evaluate( u,y );
+ypo = ts.predict( u,y );
 plotResiduals( y, ypo, 'figure', 3, 'title', 'Residuals MISO Ladedruck NARX opt' );
-
-orient landscape
-print('-dpdf','-bestfit','Test_SISO_Ladedruck_opt.pdf')

@@ -97,7 +97,7 @@ classdef TSModel  < tsm_Base
         
         %% Clustering v
         v_Type = 'FCM'       % type of clustering: fcm/gk/kmeans/...
-        v_Norm = 'Euclidian' % Norm for clustering (Euclidian/Mahlanobis')
+        v_Norm = 'Euclidean' % Norm for clustering (Euclidean/Mahlanobis')
         v              % vector of initial clusters (nv x nu )
         ProductSpace = false % Clustering in product space [u,y]
 
@@ -116,7 +116,7 @@ classdef TSModel  < tsm_Base
         GK_par = struct( 'Tolerance', '1e-5', 'Display', 'iter' )
         
         % Parameter for KMeans clustering
-        KMeans_par = struct( 'Display', 'iter', 'Distance', 'sqeuclidian' )
+        KMeans_par = struct( 'Display', 'iter', 'Distance', 'qeuclidian' )
         
         
         %% Regressor x = [ y(lag_y) | u(lag_u) ]
@@ -455,10 +455,9 @@ classdef TSModel  < tsm_Base
                     fcmopt = [ obj.nue, obj.FCM_par.MaxIt,...
                         obj.FCM_par.MinImprove,obj.FCM_par.Display ];
                     switch obj.v_Norm
-                        case 'Euclidian'
+                        case 'Euclidean'
                             for i=1:opts.tries
-                                % Euclidian/Mahalanobis
-                                [vi,~,objFunc ] = fcm_Euclidian( obj.z, obj.nv, fcmopt);
+                                [vi,~,objFunc ] = fcm_Euclidean( obj.z, obj.nv, fcmopt);
                                 if objFunc(end) < best
                                     best = objFunc(end);
                                     obj.v = vi;
@@ -466,7 +465,6 @@ classdef TSModel  < tsm_Base
                             end
                         case 'Mahalanobis'
                             for i=1:opts.tries
-                                % Euclidian/Mahalanobis
                                 [vi,~,objFunc ] = fcm_Mahalanobis( obj.z, obj.nv, fcmopt);
                                 if objFunc(end) < best
                                     best = objFunc(end);
@@ -653,7 +651,7 @@ classdef TSModel  < tsm_Base
                 case 'Gauss'
                     obj.z_msf = @tsm_membership_Gauss;
                 otherwise
-                    error( 'tsModel/set_msf: unknown type <%s>',type)
+                    error( 'tsModel/set_msf_type: unknown type <%s>',type)
             end
         end
         

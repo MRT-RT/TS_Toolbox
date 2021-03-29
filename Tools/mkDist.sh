@@ -15,5 +15,6 @@ TS_Toolbox/TSModel/@tsm_DataSet/*.m \
 TS_Toolbox/Examples/*.m \
 TS_Toolbox/Examples/*.pdf \
 TS_Toolbox/Examples/Data/*.mat \
+TS_Toolbox/Functions/*.m
 TS_Toolbox/*.txt \
 TS_Toolbox/*.pdf

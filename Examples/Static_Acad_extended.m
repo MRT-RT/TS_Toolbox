@@ -67,8 +67,8 @@ Par.Clustering = 'FCM';
 % Clustering in product space:  $u$ and $y$ (true) or only input space $u$ (false)
 Par.ProductSpace = true;
 %%
-% Norm for clustering: 'Euclidian' or 'Mahalanobis', default = 'Euclidian'
-Par.Norm = 'Euclidan';
+% Norm for clustering: 'Euclidean' or 'Mahalanobis', default = 'Euclidean'
+Par.Norm = 'Euclidean';
 %%
 % Membership functions: 'FCM' or 'Gauss' type clustering
 Par.MSF = 'FCM';
