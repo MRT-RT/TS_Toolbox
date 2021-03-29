@@ -3,7 +3,7 @@
 %
 % Works only with Linux!
 
-function makePDF( mfile )
+function MakePDF( mfile )
 
 publish( sprintf( '%s.m',mfile) ,'format','latex',...
     'imageFormat','png',...

@@ -11,7 +11,7 @@
         split dataset for ident/validate
 %}
 
-classdef tsm_DataSet < tsm_Base
+classdef tsm_Data < tsm_Base
     
     properties
         
@@ -39,7 +39,7 @@ classdef tsm_DataSet < tsm_Base
     
     methods
         
-        function self = tsm_DataSet( name, u, y, varargin )
+        function self = tsm_Data( name, u, y, varargin )
             
             p = inputParser;
             valCoC = @(x) iscell(x) || ischar( x );
@@ -107,10 +107,10 @@ classdef tsm_DataSet < tsm_Base
             elseif c == 1 % not a col vector
                 n = r;
             else
-                error( 'tsm_DataSet/make_ColVector: v not a vector (%d x %d)',r,c )
+                error( 'tsm_Data/make_ColVector: v not a vector (%d x %d)',r,c )
             end
             if self.n > 0 && not( n == self.n )
-                error( 'tsm_DataSet/make_ColVector: len( v ) inconsitent (%d : %d)',n,self.n )
+                error( 'tsm_Data/make_ColVector: len( v ) inconsitent (%d : %d)',n,self.n )
             end
         end
         
@@ -122,7 +122,7 @@ classdef tsm_DataSet < tsm_Base
             % Check consistent sample time
             dt = t(2) - t(1);
             if  self.dt > 0 && dt ~= self.dt
-                error( 'tsm_DataSet: t (%g) and different dt (%g) given', ...
+                error( 'tsm_Data: t (%g) and different dt (%g) given', ...
                     dt,self.dt )
             else
                 self.dt = dt;
@@ -137,7 +137,7 @@ classdef tsm_DataSet < tsm_Base
                 [ n, nu ] = size( u );
                 % nr=n or nc=n ???
                 if self.n > 0 && self.n ~= n
-                    error( 'tsm_DataSet/set_u: len u(%d) not n=%d)', n,self.n )
+                    error( 'tsm_Data/set_u: len u(%d) not n=%d)', n,self.n )
                 else
                     self.n = n;
                 end
@@ -154,7 +154,7 @@ classdef tsm_DataSet < tsm_Base
             y = self.make_ColVector( y );
             n = size( y, 1 );
             if self.n > 0 && n ~= self.n
-                error( 'tsm_DataSet/set_y: len y(%d) not n=%d', n,self.n )
+                error( 'tsm_Data/set_y: len y(%d) not n=%d', n,self.n )
             else
                 self.n = n;
             end
@@ -169,24 +169,24 @@ classdef tsm_DataSet < tsm_Base
                 if nargin == 2 % all 3 labels given { t,{u},y }
                     
                     if ~iscell( v1 )
-                        error( 'tsm_DataSet.set_Label arg 1 not cell' )
+                        error( 'tsm_Data.set_Label arg 1 not cell' )
                     end
                     if length( v1 ) ~= 3
-                        error( 'tsm_DataSet.set_Label len(arg 1) <> 3' )
+                        error( 'tsm_Data.set_Label len(arg 1) <> 3' )
                     end
                     if not( ischar( v1{1} ) )
-                        error( 'tsm_DataSet.set_Label: label t not string' )
+                        error( 'tsm_Data.set_Label: label t not string' )
                     end
                     if length( v1{3} ) ~= self.nu
-                        error( 'tsm_DataSet.set_Label: label u not string(%d)',self.nu )
+                        error( 'tsm_Data.set_Label: label u not string(%d)',self.nu )
                     end
                     for i=1:self.nu
                         if not( ischar( v1{2}{i} ) )
-                            error( 'tsm_DataSet.set_Label: label u(%d) not string',i )
+                            error( 'tsm_Data.set_Label: label u(%d) not string',i )
                         end
                     end
                     if not( ischar( v1{3} ) )
-                        error( 'tsm_DataSet.set_Label: label y not string' )
+                        error( 'tsm_Data.set_Label: label y not string' )
                     end
                     self.t_label = v1{1};
                     self.u_label = v1{2};
@@ -196,35 +196,35 @@ classdef tsm_DataSet < tsm_Base
                     
                     if v1 == 't'
                         if not( ischar( v2 ) )
-                            error( 'tsm_DataSet.set_Label t not string' )
+                            error( 'tsm_Data.set_Label t not string' )
                         else
                             self.t_label = v2;
                         end
                     elseif v1 == 'u'
                         if length( v2 ) ~= self.nu
-                            error( 'tsm_DataSet.set_Label u not string{%d}', self.nu )
+                            error( 'tsm_Data.set_Label u not string{%d}', self.nu )
                         end
                         if not( iscell( v2 ) )
-                            error( 'tsm_DataSet.set_Label u not string{%d}', self.nu )
+                            error( 'tsm_Data.set_Label u not string{%d}', self.nu )
                         end
                         for i=1:self.nu
                             if not( ischar( v2{i} ) )
-                                error( 'tsm_DataSet.set_Label u(%d) not string', i )
+                                error( 'tsm_Data.set_Label u(%d) not string', i )
                             end
                         end
                         self.u_label = v2;
                         
                     elseif v1 == 'y'
                         if not( ischar( v2 ) )
-                            error( 'tsm_DataSet.set_Label y not string' )
+                            error( 'tsm_Data.set_Label y not string' )
                         else
                             self.y_label = v2;
                         end
                     else
-                        error( 'tsm_DataSet.set_Label arg 1 not t/u/y' )
+                        error( 'tsm_Data.set_Label arg 1 not t/u/y' )
                     end
                 else
-                    error( 'tsm_DataSet.set_Label not arg or arg1,arg2' )
+                    error( 'tsm_Data.set_Label not arg or arg1,arg2' )
                 end
             end
         end
@@ -241,7 +241,7 @@ classdef tsm_DataSet < tsm_Base
                             self.u_unit{i} = unit{i};
                         end
                     else
-                        error( 'tsm_DataSet/set_Unit: unit u not char(nu)')
+                        error( 'tsm_Data/set_Unit: unit u not char(nu)')
                     end
                 elseif signal == 'y'
                     self.y_unit = unit;
@@ -254,7 +254,7 @@ classdef tsm_DataSet < tsm_Base
                 if isequal( size(limit), [1,2] )
                     self.t_limit = limit;
                 else
-                    error( 'tsm_DataSet/set_Limit: limits u not (1x2)')
+                    error( 'tsm_Data/set_Limit: limits u not (1x2)')
                 end
             elseif signal == 'u'
                 if ( self.nu == 1 && isequal( size(limit), [1,2] ) ) || ...
@@ -263,16 +263,16 @@ classdef tsm_DataSet < tsm_Base
                         self.u_limit(i,:) = limit(i,:);
                     end
                 else
-                    error( 'tsm_DataSet/set_Limit: limits u not (nux2)')
+                    error( 'tsm_Data/set_Limit: limits u not (nux2)')
                 end
             elseif signal == 'y'
                 if isequal( size(limit), [1,2] )
                     self.y_limit = limit;
                 else
-                    error( 'tsm_DataSet/set_Limit: limits y not (1x2)')
+                    error( 'tsm_Data/set_Limit: limits y not (1x2)')
                 end
             else
-                error( 'tsm_DataSet/set_Limit: no t/u/y limits')
+                error( 'tsm_Data/set_Limit: no t/u/y limits')
             end
         end
         

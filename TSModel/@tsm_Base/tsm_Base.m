@@ -5,7 +5,7 @@
 classdef tsm_Base < handle & matlab.mixin.Copyable
     
     properties(Constant)
-        Version = '0.91.'; % Version of TSModel class
+        Version = '0.92'; % Version of TSModel class
     end
     
     properties
