@@ -6,6 +6,7 @@
 *.bak 
 *.BAK
 *.asv
+html/
 Archiv/
 Backups/
 Dists/
