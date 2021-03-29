@@ -15,10 +15,10 @@
 % * number of clusters / local models $n_c$
 % * clustering algorithm (FCM/GK)
 % * clustering norm (Euclidean/Mahalanobis)
-% * membership function type (FCMF/Gauss) with fuzziness parameter $\nue$
+% * membership function type (FCMF/Gauss) with fuzziness parameter $\nu$
 % * type of local models (Static/ARX/OE)
-% * lags for scheduling variables $z_{lag}_u}$ and $z_{lag}_y}$ (default = $[1\ldots n_u]$ and $[1\ldots n_y]$
-% * lags for regressor variables $x_{lag}_u}$ and $x _{lag}_y}$ (default = $[1\ldots n_u]$
+% * lags for scheduling variables $z_{{lag}_u}$ and $z_{{lag}_y}$ (default = $[1\ldots n_u]$ and $[1\ldots n_y]$
+% * lags for regressor variables $x_{{lag}_u}$ and $x_{{lag}_y}$ (default = $[1\ldots n_u]$
 
 %% Mathematics
 % 
@@ -30,11 +30,11 @@
 %
 % and the local models
 %
-% $$y_{i}(k) = \cdot A_i\cdot y(x_{{lag}_y}) + B_i\cdot u(x_{{lag]_u}) + C_i$$
+% $$ y_{i}(k) = \cdot A_i\cdot y(x_{{lag}_y}) + B_i\cdot u(x_{{lag}_u}) + C_i $$
 %
 % with the regressor
 %
-% $$x = \left[ y(x_{{lag}_y})), u(x_{{lag}_u}) \right]$$
+% $$ x = \left[ y(x_{{lag}_y})), u(x_{{lag}_u}) \right] $$
 
 %% Local model type: Static
 %
@@ -50,8 +50,7 @@
 
 
 classdef TSModel  < tsm_Base
-    
-    % ToDo: Static: kein t -> 1:n
+    % TSModel TS model class
     
     properties
         
@@ -96,9 +95,9 @@ classdef TSModel  < tsm_Base
         zmu            % membership degrees of z
         
         
-        %% Clustering c
-        c_Type = 'FCM'       % type of clustering: fcm/gk/kmeans/...
-        c_Norm = 'Euclidian' % Norm for clustering (Euclidian/Mahlanobis')
+        %% Clustering v
+        v_Type = 'FCM'       % type of clustering: fcm/gk/kmeans/...
+        v_Norm = 'Euclidian' % Norm for clustering (Euclidian/Mahlanobis')
         v              % vector of initial clusters (nv x nu )
         ProductSpace = false % Clustering in product space [u,y]
 
@@ -152,6 +151,7 @@ classdef TSModel  < tsm_Base
     methods
         
         function obj = TSModel( type, nv, nu, varargin )
+            % constructor 
             
             v = ver('MATLAB');
             if v.Version < 9.7 % R2019b
@@ -205,13 +205,15 @@ classdef TSModel  < tsm_Base
                         
         end
         
-        %% Set same lags for scheduling and regressor
         function obj = setLags( obj, u_lags, y_lags )
+            % Set same lags for scheduling and regressor
             obj.setSchedulingLags( u_lags, y_lags );
             obj.setRegressorLags( u_lags, y_lags );
         end
                 
         function obj = setSchedulingLags( obj, u_lags, y_lags )
+            % Set lags for scheduling 
+            
             if isempty( u_lags )
                 for i=1:obj.nu
                     obj.z_lag_u{i} = 0;
@@ -253,10 +255,9 @@ classdef TSModel  < tsm_Base
             end
             obj.z_maxlag = max( obj.z_maxlag, max(obj.z_lag_y) );
         end
-        
 
-        %% Set regressor lags for u / y
         function obj = setRegressorLags( obj, u_lags, y_lags )
+            % Set lags for regressor
             if isempty( u_lags )
                 for i=1:obj.nu
                     obj.x_lag_u{i} = 0;
@@ -309,10 +310,13 @@ classdef TSModel  < tsm_Base
         end
         
         function obj = setDataComment( obj, comment )
+            % Set comment for identification data
             obj.C_ident = comment;
         end
         
         function obj = setDataLimits( obj, limits )
+            % Set limits for identification data
+            % limits: [u_1min, u1_max ; ... ; u_nu_min, u_nu_max ; y_min, y_max ]
             if isempty( limits )
                 obj.Limits(:,1) = [min(obj.u_ident),min(obj.y_ident)];
                 obj.Limits(:,2) = [max(obj.u_ident),max(obj.y_ident)];
@@ -326,6 +330,7 @@ classdef TSModel  < tsm_Base
         end
         
         function obj = setData( obj, u, y, varargin )
+            % Set identification data u and y
             
             p = inputParser;
             p.addRequired( 'u', @ismatrix )
@@ -342,7 +347,7 @@ classdef TSModel  < tsm_Base
             
             [n,n_u] = size( u );
             if n_u ~= obj.nu
-                error( 'TSModel/setData:  dim u <> n x nu' )
+                error( 'TSModel/setData: dim u not N x nu' )
             end
             obj.N_ident = n;
             obj.u_ident = u;
@@ -350,18 +355,18 @@ classdef TSModel  < tsm_Base
             if ~isempty( opts.t )
                 [r,c] = size( opts.t );
                 if r == 1
-                    t = transpose(t);
+                    opts.t = transpose( opts.t );
                 end
-                if  c == obj.n
+                if  c == obj.N_ident
                     obj.t_ident = opts.t;
                 else
-                    error( 'TSModel/Data: t')
+                    error( 'TSModel/setData: dim t not N x 1')
                 end
             end
             
             [n,n_y] = size( y );
             if n_y ~= 1 || n ~= obj.N_ident
-                error( 'TSModel: dim y not n x 1' )
+                error( 'TSModel/setData: dim y not N x 1' )
             end
             obj.y_ident = y;
             
@@ -369,13 +374,23 @@ classdef TSModel  < tsm_Base
             obj = setDataLimits( obj, opts.Limits );
             obj = setDataComment( obj, opts.Comment );
             
-            obj.t_ident = [ 0:obj.N_ident-1 ]*obj.ts_ident;
+            % ts_ident vs. t_ident
+            if opts.SampleTime > 0 
+                % create missing time vector from sample-time
+                if isempty( obj.t_ident )
+                    obj.t_ident = [ 0:obj.N_ident-1 ]*obj.ts_ident;
+                else
+                    if opts.SampleTime ~= diff(obj.t_ident(1:2))
+                        error( 'TSModel/setData: sample-time mismatch' )
+                    end
+                end
+            end
             
         end
         
-        % setCluster
-        % Input: arg = nv (Scalar) or v (matrix)
         function obj = setCluster( obj, arg )
+            % setCluster
+            % Input: arg = nv (Scalar) or v (matrix)
             if isscalar( arg )
                 obj.nv = arg;
                 obj.v = zeros( obj.nv, obj.nu )
@@ -392,19 +407,21 @@ classdef TSModel  < tsm_Base
         end
         
         function v = getCluster( obj )
+            % Get cluster centers v
             v = obj.v;
         end
         
         function obj = setFuzziness( obj, nue )
+            % Set fuzziness factor (FBF or Gauss)
             obj.nue = nue;
             obj.m = 2 / (obj.nue-1 );
         end
         
         function obj = clustering( obj, type, varargin )
-            
+            % Do the clustering
             p = inputParser;
             p.addRequired( 'type', @ischar )
-            p.addParameter('norm',obj.c_Norm,@ischar)  % fcm norm
+            p.addParameter('norm',obj.v_Norm,@ischar)  % fcm norm
             p.addParameter('tries',1,@isscalar)
             p.addParameter('nue',obj.nue,@isscalar)    % fcm
             p.addParameter('tolerance',1e-5,@isscalar) % gk
@@ -415,8 +432,8 @@ classdef TSModel  < tsm_Base
             opts = p.Results;
             
             % Scheduling variable z_lag_u/z_lag_y or fct()
-            obj.c_Type = opts.type;
-            obj.c_Norm = opts.norm;
+            obj.v_Type = opts.type;
+            obj.v_Norm = opts.norm;
             obj.ProductSpace = opts.productspace;
             
             obj.nue = opts.nue;
@@ -429,7 +446,7 @@ classdef TSModel  < tsm_Base
                 rng( opts.seed );
             end
             
-            switch obj.c_Type
+            switch obj.v_Type
                 case 'FCM'
                     if opts.nue <= 1
                         error( 'tsModel/clustering: nue < 1')
@@ -437,7 +454,7 @@ classdef TSModel  < tsm_Base
                     best = inf;
                     fcmopt = [ obj.nue, obj.FCM_par.MaxIt,...
                         obj.FCM_par.MinImprove,obj.FCM_par.Display ];
-                    switch obj.c_Norm
+                    switch obj.v_Norm
                         case 'Euclidian'
                             for i=1:opts.tries
                                 % Euclidian/Mahalanobis
@@ -458,7 +475,7 @@ classdef TSModel  < tsm_Base
                             end
                     end
                     
-                case 'GK'
+                case 'GK' % Gustaffson-Kessel
                     obj.v = gk( obj.z, obj.nv, obj.m, obj.GK_par.Tolerance );
                 
                 case 'KMeans'
@@ -476,12 +493,14 @@ classdef TSModel  < tsm_Base
             end
         end
         
-        %% Get membership degree
         function mu = getMSF( obj, u, y )
+            % Get membership function degree
+            
             if nargin < 2
                 u = obj.u_ident;
                 y = obj.y_ident;
             end
+            
             switch obj.Type
                 case 'Static'
                     % Scheduling var = u / forget ProductSpace
@@ -495,8 +514,9 @@ classdef TSModel  < tsm_Base
             end
         end
         
-        %% Initialize model parameters A/B/C
         function obj = initialize( obj, msf, varargin )
+            % Initialize local models: parameters A/B/C 
+            % with local or global Least Squares
             
             p = inputParser;
             p.addRequired( 'msf', @ischar )
@@ -595,13 +615,16 @@ classdef TSModel  < tsm_Base
             end
         end
         
-        function [A,B,C] = getLM( obj )
+        function [ A,B,C ] = getLM( obj )
+            % Get local model parameters
+            
             A = obj.A;
             B = obj.B;
             C = obj.C;
         end
         
         function obj = setLM( obj, A,B,C )
+            % Set local model parameters A,B,C
             
             if ~isempty(A) && ~isequal( size(A), [obj.nv,length(obj.x_lag_y)] )
                 error( 'TSModel/setLM: dim A <> nv x lag_y' )
@@ -622,6 +645,8 @@ classdef TSModel  < tsm_Base
         end
         
         function obj = set_msf_type( obj, type )
+            % Set type of MSF: FCM or Gauss
+            
             switch type
                 case 'FCM'
                     obj.z_msf = @tsm_membership_FCM;
@@ -632,10 +657,17 @@ classdef TSModel  < tsm_Base
             end
         end
         
-        %% Predict the TS model at vectors u / u,y
         function yp = predict( obj, u, y )
-
+            % Predict the TS model at vectors u (OE) or u,y (ARX)
+            
+            % Static: len(u) = len(y)  = N
+            % ARX: len(u) = len(y) = N
+            % OE:  len(u) = N, y_0: len(y)>=max(z_lag_y,x_lag_y)
+            
             % Check A/B/C not empty (model not yet initialized)
+            if ~strcmp( obj.Type, 'Static') && isempty(obj.A)
+                error( 'tsModel/predict: matrix A empty' )
+            end
             if isempty(obj.B)
                 error( 'tsModel/predict: matrix B empty' )
             end
@@ -647,17 +679,32 @@ classdef TSModel  < tsm_Base
                 case 'Static'
                     yp = tsm_predict_Static( obj, u );
                 case 'ARX'
-                    if isempty(obj.A) || isempty(obj.C)
-                        error( 'tsModel/predict: matrix A or C empty' )
-                    end
                     yp = tsm_predict_ARX( obj, u, y );
                 case 'OE'
                     yp = tsm_predict_OE( obj, u, y );
             end
         end
         
-        %% Optimize the TS model parameters
+        function yp = simulate( obj, u, y )
+            % Simulate the TS model with vectors u and y_0
+            
+            % Static: len(u) = len(y)
+            % ARX: len(u)=N, len(y)=N
+            % OE:  len(u)=N, y_0: len(y)=max(z_lag_y,x_lag_y)
+
+            warning( 'TSModel/simulate: not yet implemented' )
+            switch obj.Type
+                case 'Static'
+                    yp = tsm_predict_Static( obj, u );
+                case 'ARX'
+                    yp = tsm_predict_ARX( obj, u, y );
+                case 'OE'
+                    yp = tsm_predict_OE( obj, u, y );
+            end
+        end
+        
         function obj = optimize( obj, method, varargin )
+            % Optimize the TS model parameters
             
             p = inputParser;
             p.addRequired( 'method', @ischar )
@@ -853,14 +900,13 @@ classdef TSModel  < tsm_Base
         end
         
         function obj = setName( obj, name )
+            % Set name of TS model
             obj.Name = name;
         end
-        
-        function obj = setComment( obj, comment )
-            obj.Comment = comment;
-        end
-        
+       
         function [A,B,C] = Regressor2ABC( obj, Theta )
+            % Get local model matrices A,B,C from regressor matrix
+
             if nargin < 2
                 Theta = obj.Theta;
             end
@@ -873,17 +919,12 @@ classdef TSModel  < tsm_Base
         end
         
         function disp( obj )
+            % Dsiplay TS model settings and parameters
+            
             fprintf( 'TS-Model: Type=%s\n', obj.Type )
+            
             disp@tsm_Base( obj )
-%             if ~isempty( obj.Name )
-%                 fprintf( ', Name="%s"', obj.Name )
-%             end
-%             if ~isempty( obj.Date )
-%                 fprintf( ', [created: %s]', obj.Date )
-%             end
-%             if ~isempty( obj.Comment ) % for c in obj.Comment
-%                 fprintf( ' (%s)', obj.Comment )
-%             end
+
             fprintf( ' Structural parameters: nu = %d, ny = %d, nv = %d\n', obj.nu, obj.ny, obj.nv )
             
             if obj.N_ident > 0
@@ -911,11 +952,11 @@ classdef TSModel  < tsm_Base
             if ~isempty( obj.z_lag_y )
                 fprintf( '  Membership function type = %s\n', obj.z_Type )
             end
-            switch obj.c_Type 
+            switch obj.v_Type 
                 case'FCM'
-                    fprintf( '  Clustering: %s, nue=%g norm=%s', obj.c_Type, obj.nue, obj.c_Norm )
+                    fprintf( '  Clustering: %s, nue=%g norm=%s', obj.v_Type, obj.nue, obj.v_Norm )
                 case'Gauss'
-                    fprintf( '  Clustering: %s, sigma=%g', obj.c_Type, obj.sigma )
+                    fprintf( '  Clustering: %s, sigma=%g', obj.v_Type, obj.sigma )
             end
             if obj.ProductSpace
                     fprintf( ' in product space\n')
@@ -942,9 +983,8 @@ classdef TSModel  < tsm_Base
             end
         end
         
-        %%
         function h = plotCluster( obj, v, varargin )
-            
+            % Plot clustering as 2D-plots for all dimensions u and y
             p = inputParser;
             p.addRequired('v',@ismatrix)
             p.addParameter('figure',2,@isscalar)
@@ -1007,19 +1047,21 @@ classdef TSModel  < tsm_Base
             end
         end
         
-        function h = plotIdentData( obj, t,u, y  )
-            
-            %ToDo: u separat/zusammen
-            %varargin
-            h = figure(1);
-            clf
+        function h = plotIdentData( obj, t,u,y,fig  )
+            % Plot the identification data    
+   
             
             if nargin < 4
                 t = obj.t_ident;
                 u = obj.u_ident;
                 y = obj.y_ident;
+                fig = 1;
             end
-            
+
+            %ToDo: u separat/zusammen
+            h = figure( fig );
+            clf
+
             n = size(t,2);
             nu = size(u,2);
             ny = size(y,2);
@@ -1053,6 +1095,7 @@ classdef TSModel  < tsm_Base
         end
         
         function plot( obj )
+            % Plot the TS model: data and cluster centers
             
             plotIdentData( obj, obj.t_ident, obj.u_ident,  obj.y_ident );
             plotCluster( obj, obj.v );
@@ -1060,4 +1103,5 @@ classdef TSModel  < tsm_Base
         end
         
     end
+    
 end

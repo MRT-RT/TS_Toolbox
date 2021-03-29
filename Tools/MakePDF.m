@@ -23,6 +23,10 @@ system( sprintf( 'cd /tmp && pdflatex %s && pdflatex %s', mfile, mfile ) )
 % Move resulting PDF to actual directory
 movefile( sprintf( '/tmp/%s.pdf', mfile ), '.' )
 
+%
+% system( sprintf( 'okular %s.pdf', mfile ) )
+
+
 % % cleanup LaTeX aux files
 % for ext = { 'aux','log','out','toc' }
 %     delete( sprintf('PDF/%s.%s', mfile,ext{1} ) )

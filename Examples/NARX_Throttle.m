@@ -63,15 +63,15 @@ ts.setDataLimits( [-20,45 ; 0,5] );
 
 %%
 % Plot the identification data
-plotIdentData( ts );
+plotIdentData( ts, 1 );
 set(gcf, 'WindowState', 'maximized' );
 
 %%
 % Set the scheduling lags:  u(k), y(k-1), y(k-2),  y(k-3)
-ts.setSchedulingLags( [0], [1,2,3] );
+ts.setSchedulingLags( {0}, [1,2,3] );
 %%
 % Set the regressor lags:  u(k), y(k-1), y(k-2),  y(k-3)
-ts.setRegressorLags( [0], [1,2,3] );
+ts.setRegressorLags( {0}, [1,2,3] );
 
 %% Clustering 
 %
@@ -80,13 +80,13 @@ ts.setRegressorLags( [0], [1,2,3] );
 ts.clustering( 'FCM', 'nue', nue, 'tries',10, 'seed', 0 );
 %%
 % Cluster centers $v_1$: (columns $z=[y_{k-1},y_{k-2},y_{k-3},u_k]$, rows=local models)
-v1 = getCluster(ts)
+v1 = getCluster( ts )
 
 %% Initialization of the local models 
 %
 % The local models are intialized with global Least-Squares and FCM
 % membership functions ($\nu=1.1$)
-ts.initialize( MSF, 'nue', nue, 'method','global'  );
+ts.initialize( MSF, 'nue', nue, 'method','global' );
 
 %% Prediction of the initial TS model 
 %

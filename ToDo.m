@@ -20,3 +20,25 @@
 % Alternative: neues u für Ableitungen aufnehmen statt der Lags
 %%
 % 29.3.2029/ad
+
+%% Zeiger auf Benutzer-Bewertungsfunktion
+%%
+% * für Optimierung
+% * für Modellauswahl (Wrapper-Ansatz)
+%%
+% 29.3.2029/ad
+
+%% Local Models: Init ARX/OE parameters
+%%
+% * random 
+% * from other TS model
+%%
+% 29.3.2029/ad
+
+%% Offnen Punkte
+% 
+%% 
+% * Zeitvektor $t$ immer äquidistant / t_s konstant?
+
+%% Befehle
+% git clone /mrt/Software/Repos/git/TS_Toolbox.git

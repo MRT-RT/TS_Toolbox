@@ -6,7 +6,7 @@ if test -d TS_Toolbox/Dists; then
 else
  dest=. 
 fi
-zip -r $dest/TS_Toolbox-$(date '+%Y-%m-%d').zip \
+zip -r $dest/TS_Toolbox-$(date '+%Y_%m_%d')-dist.zip \
 TS_Toolbox/TSModel/*.m \
 TS_Toolbox/TSModel/@tsm_Base/*.m \
 TS_Toolbox/TSModel/@tsm_Prem/*.m \
