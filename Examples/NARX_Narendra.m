@@ -162,7 +162,7 @@ legend('u','y_{obsv}','y_{pred}')
 set(gcf,'WindowState', 'maximized' );
 %%
 % Plot the correlation
-plotResiduals( y, y_pred_val, 'figure', 4, 'title', 'Narendra/NARX: correlation' );
+plotResiduals( y_val, y_pred_val, 'figure', 4, 'title', 'Narendra/NARX: correlation' );
 set(gcf,'WindowState', 'maximized' );
 
 %% Optimize the TS model parameters 
@@ -171,6 +171,7 @@ ts.optimize( 'B' )
 %%
 % Cluster centers of the optimized TS model
 v2 = getCluster( ts )
+
 %%
 % Plot the correlation
 y_pred_opt = ts.predict( u,y );
@@ -185,7 +186,7 @@ yyaxis left
 plot(t,u,'b--')
 grid on
 ylabel('u')
-title( sprintf('Narendra/NHARX: optimized model n_v=%d \\nu=%g',ts.nv,ts.nue))
+title( sprintf('Narendra/NARX: optimized model n_v=%d \\nu=%g',ts.nv,ts.nue))
 
 yyaxis right
 plot(t,y,'g-',t,y_pred_opt,'r-')
@@ -193,4 +194,9 @@ grid on
 ylabel('y')
 xlabel('t')
 legend('u','y_{obsv}','y_{pred}')
+set(gcf,'WindowState', 'maximized' );
+
+%%
+% Plot the residual histogram
+plotResidualHist( y, y_pred_opt, 'figure', 7, 'title', 'Narendra/NARX opt: correlation', 'nbins',25 );
 set(gcf,'WindowState', 'maximized' );

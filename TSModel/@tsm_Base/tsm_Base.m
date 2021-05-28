@@ -1,12 +1,18 @@
 %% TS-Toolbox: Definition of base class
 
 % $Id$
+%
+% Author: Axel Dürrbaum (<mailto:axel.duerrbaum@mrt.uni-kassel.de>)
+%
+% Copyright (c) 2021, Axel Dürrbaum <axel.duerrbaum@mrt.uni-kasseld.de>
 
 classdef tsm_Base < handle & matlab.mixin.Copyable
     
     properties(Constant)
         Version = '0.92'; % Version of TSModel class
-    end
+        Author = 'Axel Dürrbaum'
+        Copyright = '(c) 2021, Axel Dürrbaum <axel.duerrbaum@mrt.uni-kasseld.de>'
+   end
     
     properties
         Type         % type of object 

@@ -15,6 +15,8 @@
 %
 % $Id$
 
+addpath( '../TSModel' );  % Path to TSModel class
+
 %% Identification data 
 % Use the 3-dimensional Friedman function: 
 nu = 3;
@@ -40,7 +42,6 @@ MSF = 'FCM';
 
 %% Estimation of the static LiP TS model
 %
-addpath( '../TSModel' );  % Path to TSModel class
 ts = TSModel( 'Static', nv, nu, 'comment', 'Friedman 3D' );
 %%
 % Set the identification data: $u$, $y$
@@ -77,7 +78,7 @@ y_pred = ts.predict( u, y );
 
 %%
 % Plot the correlation
-plotResiduals( y, y_pred, 'figure', 2, 'title', 'Friedman-3D: correleation' );
+plotResiduals( y, y_pred, 'figure', 2, 'title', 'Friedman-3D: validation/correlation' );
 set(gcf,'WindowState','maximized');
 %%
 % Plot the residual histogram:
@@ -106,7 +107,7 @@ grid on
 xlabel('k')
 ylabel('y')
 title( 'Friedman-3D: Validation' )
-legend( 'y_{\mathrm{obsv}}','y_{\mathrm{pred}}' )
+legend( 'y_{obsv}','y_{pred}' )
 set(gcf,'WindowState','maximized');
 %%
 % Plot the correlation 

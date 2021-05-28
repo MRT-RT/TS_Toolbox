@@ -6,6 +6,9 @@
 % Compute and optimize a nonlinear Takagi--Sugeno--Model
 % by clustering and identification of local models
 %
+% Author: Axel Dürrbaum (<mailto:axel.duerrbaum@mrt.uni-kassel.de>)
+%
+% Copyright (c) 2021, Axel Dürrbaum <axel.duerrbaum@mrt.uni-kasseld.de>
 
 %% Given: MISO system
 %%

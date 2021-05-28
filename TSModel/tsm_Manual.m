@@ -4,7 +4,7 @@
 %
 % <<Titelbild-TSM.jpg>>
 % 
-% Version: 1.3 vom 14.9.2020
+% Version: 0.92 vom 1.4.2021
 %
 % Prof. Dr.-Ing. Andreas Kroll, FG Mess- und Regelungstechnik, FB 15 Maschinenbau, Universität Kassel
 % 
@@ -13,6 +13,8 @@
 % URL: <http://www.uni-kassel.de/go/mrt>
 %
 % Author: Axel Dürrbaum (<mailto:axel.duerrbaum@mrt.uni-kassel.de>)
+%
+% Copyright (c) 2021, Axel Dürrbaum <axel.duerrbaum@mrt.uni-kasseld.de>
 
 %% Aufgabe: Nichtlineare Systemidentifikation und Regression
 %%

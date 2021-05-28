@@ -1,6 +1,6 @@
 %% Takagi-Sugeno Model Identification Toolbox
 %
-% Static LiP model for a compressor model.
+% Static LiP model for a compressor.
 %
 %
 % Axel Dürrbaum (<axel.duerrbaum@mrt.uni-kassel.de>)
@@ -50,17 +50,18 @@ ts.initialize( 'FCM', 'nue', nu, 'method','global'  );
 %% 
 % Predict the TS model for observed input data
 y_pred = ts.predict( u_val );
-plotResiduals( y_val, y_pred, 'figure', 4, 'title', 'Compressor: correlation' );
+hv = plotResiduals( y_val, y_pred, 'figure', 4, 'title', 'Compressor: correlation' );
+hv.WindowState = 'maximized';
 
 %% 
-% Optimize TS model: optimize only cluster centers $v$ 
+% Optimize TS model: optimize only local models $A,B$ 
 ts.optimize( 'M' );
-v2 = getCluster( ts );
 
 %%
 % Plot the correlation
 y_pred_opt = ts.predict( u_val );
-plotResiduals( y_val, y_pred_opt, 'figure', 5, 'title', 'Compressor opt: correlation' );
+hv = plotResiduals( y_val, y_pred_opt, 'figure', 5, 'title', 'Compressor opt: correlation' );
+hv.WindowState = 'maximized';
 
 % Plot the correlation histogram
 hv = plotResidualHist( y_val, y_pred_opt, 'nbins',21, ...

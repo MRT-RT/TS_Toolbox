@@ -92,7 +92,8 @@ ts.initialize( MSF, 'nue', nue, 'method','global' );
 %
 % Prediction of the NARX TS model with the identificaton input: $u$
 y_pred = ts.predict( u,y );
-plotResiduals( y, y_pred, 'figure', 2, 'title', 'Residuals Throttle NARX' );
+plotResiduals( y, y_pred, 'figure', 2, 'title', ...
+    'Throttle NARX: validation/correlation ' );
 set(gcf, 'WindowState', 'maximized' );
 
 %% Optimization of the TS model
@@ -111,7 +112,8 @@ v2 = getCluster( ts )
 y_pred_opt = ts.predict( u,y );
 %%
 % Plot the correlation
-plotResiduals( y, y_pred_opt, 'figure', 3, 'title', 'Residuals Throttle NARX opt' );
+plotResiduals( y, y_pred_opt, 'figure', 3, 'title', ...
+    'Throttle NARX opt: validation/correlation ' );
 set(gcf, 'WindowState', 'maximized' );
 
 %%
@@ -121,16 +123,16 @@ subplot(4,1,1:2)
 plot( t,y,'k-',t,y_pred,'r--',t,y_pred_opt,'g-.')
 grid on
 ylabel('y')
-legend('y_{obsv}','y_{pred}','y_{prod.opt}','Location','best')
+legend('y_{obsv}','y_{pred}','y_{pred.opt}','Location','best')
 title( 'Throttle: predicted vs. observed data-points' )
 subplot(4,1,3)
 plot( t,y-y_pred,'k-')
 grid on
-ylabel('y-y_{pred}')
+ylabel('y_{obsv}-y_{pred}')
 subplot(4,1,4)
-plot( t,y_pred-y_pred_opt,'k-')
+plot( t,y-y_pred_opt,'k-')
 grid on
-ylabel('y_{pred}-y_{pred,opt}')
+ylabel('y_{obsv}-y_{pred,opt}')
 xlabel( 'time t' )
 set(gcf, 'WindowState', 'maximized' );
 

@@ -107,17 +107,17 @@ model = TSM_Static_auto( u, y, Par );
 % As validation data, use random inputs $u_{val}\in [0,2]\times[0,2]$ 
 % with $N_{val}=2000$ data-points 
 N_val = 2000;
-u_val = 2 * rand( N_val, Par.nu ); 
-y_val = model.predict( u_val );
+u_pred = 2 * rand( N_val, Par.nu ); 
+y_pred = model.predict( u_pred );
 %%
 % Plot of model outputs for random test input data:
 he = figure( 10 );
 plot3( u(:,1), u(:,2),y,'b.', ...
-       u_val(:,1), u_val(:,2), y_val,'r.','MarkerSize',8);
-legend( 'y_{ident}', 'y_{val}','Location','NW' )
+       u_pred(:,1), u_pred(:,2), y_pred,'r.','MarkerSize',8);
+legend( 'y_{obsv}', 'y_{pred}','Location','NW' )
 grid on
 xlabel('u_1'),ylabel('u_2'),zlabel('y')
-title( 'Static auto: random validation data' )
+title( 'Static ext: random validation data' )
 set(gca,'FontSize', 14)
 set(gcf,'WindowState','maximized');
 
@@ -128,13 +128,14 @@ N_grid = 40;
 u_grid = [ U1_grid(1:end)', U2_grid(1:end)' ];
 y_grid = model.predict( u_grid );
 Y_grid = reshape( y_grid,N_grid,N_grid );
+
 %%
 % Plot of model output for grid input data:
 hg = figure( 11 );
 plot3( U1_grid, U2_grid, Y_grid, 'k.')
 grid on
 xlabel('u_1'),ylabel('u_2'),zlabel('y')
-title( 'Static auto: grid data' )
+title( 'Static ext: grid data' )
 set(gca,'FontSize', 14)
 hg.WindowState = 'maximized';
 
@@ -144,9 +145,11 @@ hg.WindowState = 'maximized';
 mu_grid = getMSF( model, u_grid, y_grid );
 %%
 % Plot the membership degrees  $\phi$ in 2D
+c = getCluster( model );
+
 figure(12),clf
 hold on
-plot( v(:,1), v(:,2),'rx' )
+plot( c(:,1), c(:,2),'rx' )
 for i=1:model.nv
     contour( U1_grid,U2_grid, reshape(mu_grid(:,i),N_grid,N_grid), 1 )
 end
@@ -155,7 +158,7 @@ axis square
 grid on, box on
 view(0,90)
 xlabel('u_1'),ylabel('u_2'),zlabel('\phi(z)')
-title( 'Cluster centers' )
+title( 'Static ext: cluster centers' )
 legend( 'v', '\phi_i=0.5' )
 set(gca,'FontSize', 14)
 set(gcf,'WindowState','maximized');
@@ -170,7 +173,7 @@ hold off
 axis square
 view(-20,40)
 xlabel('u_1'),ylabel('u_2'),zlabel('\phi(z)')
-title( 'Membership degrees' )
+title( 'Static ext: membership degrees' )
 set(gca,'FontSize', 14)
 set(gcf,'WindowState','maximized');
 
@@ -181,7 +184,7 @@ hold on
 plot3( u(:,1),u(:,2),y,'k.' )
 mesh( U1_grid,U2_grid, reshape(Y_grid,N_grid,N_grid) )
 hold off
-title( 'Predicted TS model' )
+title( 'Static ext: predicted TS model' )
 xlabel('u_1'),ylabel('u_2'),zlabel('y')
 grid on, box on
 axis square
@@ -189,4 +192,3 @@ view(-20,40)
 xlabel('u_1'),ylabel('u_2'),zlabel('\phi(z)')
 set(gca,'FontSize', 14)
 set(gcf,'WindowState','maximized');
-

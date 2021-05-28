@@ -76,8 +76,11 @@ dx = diff( xl );
 yl = get( gca, 'Ylim' );
 dy = diff( yl );
 
-text( xl(2)-dx/5,yl(2)-dy/6, s, ...
-    'FontName','Courier','FontSize',10,'VerticalAlignment','top' )
+%text( xl(2)-dx/5,yl(2)-dy/6, s, ...
+%    'FontName','Courier','FontSize',10,'VerticalAlignment','top' )
+text( xl(2),yl(1), s, ...
+    'FontName','Courier','FontSize',10,'VerticalAlignment','top',...
+    'Units','normalized','Position',[0.75,0.95])
 
 h.PaperOrientation = 'landscape';
 h.WindowState = 'maximized';

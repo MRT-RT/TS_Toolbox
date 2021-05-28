@@ -10,8 +10,7 @@ addpath( '../TSModel' ) % Path to TSModel files
 %% Modell order
 nc = 3;    % number of clusters = local models
 % Selection of inputs in data
-inu = [1,2,3,4,5]
-%inu = 1:5;
+inu = [1,2,3,4,5];
 nu = length(inu);    % number of inputs
 nue = 1.2; % fuziness parameter
 
@@ -68,12 +67,18 @@ end
 %% Initial model
 ts.initialize( 'FCM', 'nue', nue, 'method','global'  );
 
-%% Evaluation of initial modell
+%% Evaluation of initial model
 yp = ts.predict( u,y );
-plotResiduals( y, yp, 'figure', 2, 'title', 'Residuals Throttle NARX' );
+plotResiduals( y, yp, 'figure', 2, 'title', 'Ladedruck MISO/NARX: correlation' );
+set(gcf,'WindowState', 'maximized' );
 
 %% Optimize Clusters c (MF) and/or local model A/B/C
-ts.optimize( 'B' )
+ts.optimize( 'B' );
+
 c2 = getCluster( ts );
 ypo = ts.predict( u,y );
-plotResiduals( y, ypo, 'figure', 3, 'title', 'Residuals MISO Ladedruck NARX opt' );
+
+%%
+% Plot the correleation
+plotResiduals( y, ypo, 'figure', 3, 'title', 'Ladedruck MISO/NARX opt: correlation' );
+set(gcf,'WindowState', 'maximized' );
